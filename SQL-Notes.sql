@@ -88,3 +88,26 @@ An example of a SELECT statement:
     FROM table_name
     WHERE column_name operator value
 */
+
+-- select all data from orders table
+SELECT *
+FROM orders;
+/*
+From the table returned above, we can see that a SELECT statement returns:
+1. The column names.
+2. The data in each column.
+3. The number of rows returned.
+
+It is also possible to select only certain columns from a table. For example, if we only wanted to see the id,
+account_id, and occurred_at columns from the orders table, we could write the following query:
+*/
+
+
+-- select id, account_id, and occurred_at from orders table
+SELECT id, account_id, occurred_at
+FROM orders;
+/*
+The result of this query is the same as the previous query, except that we only see the id, account_id, and
+occurred_at columns.
+*/
+
