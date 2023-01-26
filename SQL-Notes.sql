@@ -199,4 +199,56 @@ ascending order. We can use multiple columns in the ORDER BY statement to sort b
 */
 
 
+/*
+WHERE
+The WHERE statement allows us to filter the results of a query based on a condition.
+The WHERE statement always comes after the FROM statement, but before the ORDER BY and LIMIT statements.
+Common symbols used in WHERE statements include:
+    -- = equal to
+    -- != not equal to
+    -- > greater than
+    -- < less than
+    -- >= greater than or equal to
+    -- <= less than or equal to
+    -- BETWEEN - between a certain range
+    -- IN - to specify multiple possible values for a column
+*/
+
+-- Pulls the first 5 rows and all columns from the orders table that have a dollar amount of gloss_amt_usd greater than
+-- or equal to 1000.
+SELECT *
+FROM orders
+WHERE gloss_amt_usd >= 1000
+LIMIT 5;
+
+
+-- Pulls the first 10 rows and all columns from the orders table that have a total_amt_usd less than 500.
+SELECT *
+FROM orders
+WHERE total_amt_usd < 500
+LIMIT 10;
+
+-- Filter the accounts table to include the company name, website, and the primary point of contact (primary_poc) just
+-- for the Exxon Mobil company in the accounts table.
+SELECT name, website, primary_poc
+FROM accounts
+WHERE name = 'Exxon Mobil';
+
+-- Derived Columns - columns that are created from other columns in the same table or from other tables.
+-- For example, if we wanted to see the total amount of sales for each account, we could write the following query:
+SELECT id, account_id, total_amt_usd, total_amt_usd * 10 AS total_amt_eur
+FROM orders
+LIMIT 10;
+/*
+ The result of this query is the same as the previous query, except that we have added a new column called
+ total_amt_eur. This column is a derived column, because it is created from the total_amt_usd multiplied by 10.
+*/
+
+--Create a column that divides the standard_amt_usd by the standard_qty to find the unit price for standard paper for
+-- each order. Limit the results to the first 10 orders, and include the id and account_id fields.
+SELECT id, account_id, standard_amt_usd / standard_qty AS standard_unit_price
+FROM orders
+LIMIT 10;
+
+
 
