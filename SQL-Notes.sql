@@ -365,4 +365,72 @@ WHERE (name LIKE 'C%' OR name LIKE 'W%')
   AND (primary_poc LIKE '%ana%' OR primary_poc LIKE '%Ana%' OR primary_poc NOT LIKE '%eana%');
 
 
+/*
+DATABASE NORMALIZATION
+-- Normalization is a process used to organize a database into tables and columns.
+-- The idea is that a table should be about a specific topic and only supporting topics included.
+-- By limiting a table to one purpose you reduce the number of duplicate data contained within your database.
+-- There are three main reasons to normalize a database:
+    -- Minimize duplicate data
+    -- Minimize or avoid data modification issues
+    -- Simplify queries
+-- There are three common forms of database normalization: 1st, 2nd, and 3rd normal form.
+-- First Normal Form - The information is stored in a relational table with each column containing atomic values.
+-- There are no repeating groups of columns.
+-- Second Normal Form - The table is in first normal form and all the columns depend on the table's primary key.
+-- Third Normal Form - the table is in second normal form and all of its columns are not transitively dependent on
+the primary key.
+*/
+
+/*
+1st Normal Form
+-- The information is stored in a relational table with each column containing atomic values.
+-- There are no repeating groups of columns.
+-- Example:
+    -- Consider a table called students that contains the following columns:
+        -- id
+        -- name
+        -- address
+        -- phone
+    -- The table is in first normal form because each column contains atomic values.
+    -- There are no repeating groups of columns.
+*/
+
+
+/*
+2nd Normal Form
+    -- The table is in first normal form and all the columns depend on the table's primary key.
+    -- Example:
+        -- Consider a table called students that contains the following columns:
+            -- id
+            -- name
+            -- address
+            -- phone
+        -- The table is in first normal form because each column contains atomic values.
+        -- There are no repeating groups of columns.
+        -- The table is in second normal form because all the columns depend on the table's primary key.
+*/
+
+/*
+3rd Normal Form
+    -- The table is in second normal form and all of its columns are not transitively dependent on the primary key.
+    -- Example:
+        -- Consider a table called students that contains the following columns:
+            -- id
+            -- name
+            -- address
+            -- phone
+        -- The table is in first normal form because each column contains atomic values.
+        -- There are no repeating groups of columns.
+        -- The table is in second normal form because all the columns depend on the table's primary key.
+        -- The table is in third normal form because none of its columns are transitively dependent on the primary key.
+*/
+
+
+
+
+
+
+
+
 
