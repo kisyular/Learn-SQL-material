@@ -1253,6 +1253,26 @@ FROM web_events
 GROUP BY web_events.channel;
 
 
+/*
+You can GROUP BY multiple columns at once, as we showed here. This is often useful to aggregate across a number of
+different segments.
+The order of columns listed in the ORDER BY clause does make a difference. You are ordering the columns from left to
+right.
+*/
+
+-- Find the total number of web_events for each channel and for each account. Your solution should have three columns -
+-- the channel, the account name, and the total number of web_events for that channel and account.
+SELECT web_events.channel, accounts.name, COUNT(web_events.id) as total_web_events
+FROM web_events
+         JOIN accounts
+              ON web_events.account_id = accounts.id
+GROUP BY web_events.channel, accounts.name
+ORDER BY web_events.channel, accounts.name;
+
+
+
+
+
 
 
 
