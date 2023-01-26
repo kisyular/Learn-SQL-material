@@ -1205,6 +1205,53 @@ SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_amt_usd) as median_tota
 FROM orders;
 
 
+/*
+GROUP BY
+----------------------------------------------------------------------------------------------------------------------
+The GROUP BY clause in SQL is used in a SELECT statement to group rows that have the same values in one or more columns.
+This allows you to perform aggregate functions, such as COUNT, SUM, AVG, MIN, and MAX, on the grouped data.
+
+For example, you might have a table of orders that contains multiple rows for each customer, and you want to find the
+total number of orders and the total value of all orders for each customer. You could use the GROUP BY clause to group
+the rows by the customer_id column, and then use the COUNT and SUM functions to find the number of orders and the total
+value of all orders for each group of rows:
+
+The GROUP BY always goes between WHERE and ORDER BY.
+*/
+
+-- Which account (by name) placed the earliest order? Your solution should have the account name and the date of
+-- the order. Use ORDER BY to sort your results by the date of the order.
+SELECT accounts.name, MIN(orders.occurred_at) as earliest_order
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.name
+ORDER BY earliest_order
+LIMIT 1;
+
+-- Find the total sales in usd for each account. You should include two columns - the total sales for each company's
+-- orders in usd and the company name.
+SELECT accounts.name, SUM(orders.total_amt_usd) as total_sales_usd
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.name;
+
+-- Via what channel did the most recent (latest) web_event occur, which account was associated with this web_event?
+-- Your query should return only three values - the date, channel, and account name.
+SELECT web_events.occurred_at, web_events.channel, accounts.name
+FROM web_events
+         JOIN accounts
+              ON web_events.account_id = accounts.id
+ORDER BY web_events.occurred_at DESC
+LIMIT 1;
+
+-- Find the total number of web_events for each channel. Your solution should have two columns - the channel and the
+-- total number of web_events for that channel.
+SELECT web_events.channel, COUNT(web_events.id) as total_web_events
+FROM web_events
+GROUP BY web_events.channel;
+
 
 
 
