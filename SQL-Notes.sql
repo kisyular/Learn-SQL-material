@@ -851,6 +851,60 @@ in the customer and order columns.
 */
 
 
+/*
+FULL JOIN
+A FULL JOIN also known as a FULL OUTER JOIN in SQL is used to combine rows from two or more tables based on a
+related column between them.
+The result of a FULL JOIN includes all rows from both tables, with the matching rows in both tables. If there is no
+match, the result will still include the row from the left table, but with NULL in the columns from the right table, and
+vice versa. Here's an example of a FULL JOIN:
+SELECT a.id, a.name, o.total
+FROM join_accounts a
+FULL JOIN join_orders o ON a.id = o.account_id;
+*/
+
+-- Perform a full join on the join_accounts and join_orders tables. The join should be on the account_id column in
+-- join_orders and the id column in join_accounts. The final table should have three columns: id, name, and total.
+SELECT a.id, a.name, o.total
+FROM join_accounts a
+         FULL JOIN join_orders o ON a.id = o.account_id;
+/*
+This query will combine data from the "join_accounts" table and the "join_orders" table, and return all columns from
+both tables where the account_id column in the "join_accounts" table matches the account_id column in the "join_orders"
+table. However, it will also return all the rows from both tables, even if there is no match in the other table. The
+result set will contain NULL values for all columns from the other table for the non-matching rows from the other table.
+*/
+
+-- Perform a full join on the customers, orders, and products tables. The join should be on the customer_id column in
+-- orders and the customer_id column in customers, and the product_id column in orders and the product_id column in
+-- products. The final table should have four columns: first_name, last_name, order_date, and product_name.
+
+SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
+FROM customers
+         FULL JOIN orders_join
+                   ON customers.customer_id = orders_join.customer_id
+         FULL JOIN products
+                   ON orders_join.product_id = products.product_id;
+
+/*
+This query will combine data from the "customers" table, the "orders" table, and the "products" table by joining them
+based on the customer_id and product_id columns, respectively. It will return all columns from all three tables where
+the customer_id column in the "customers" table matches the customer_id column in the "orders" table, and product_id
+column in the "products" table matches the product_id column in the "orders" table.
+
+However, it will also return all the rows from both tables, even if there is no match in the other table. The result set
+will contain NULL values for all columns from the other table for the non-matching rows from the other table.
+
+It is important to notice that since the products table is the right table, all the rows will be in the result set, so
+even if there is no match between the product, customer and order, the product will be in the results, with NULL values
+in the customer and order columns.
+*/
+
+
+
+
+
+
 
 
 
