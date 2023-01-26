@@ -719,6 +719,73 @@ SELECT a.id, a.name, o.total
 FROM join_accounts a
          JOIN join_orders o ON a.id = o.account_id;
 
+/*
+LEFT JOIN
+A LEFT JOIN also known as a LEFT OUTER JOIN in SQL is used to combine rows from two or more tables based on a related
+column between them.
+The result of a LEFT JOIN includes all rows from the left table (table1), with the matching rows in the right table
+(table2). If there is no match, the result will still include the row from the left table, but with NULL in the columns
+from the right table.
+
+Here's an example of a LEFT JOIN:
+SELECT *
+FROM customers
+LEFT JOIN orders_join
+ON customers.customer_id = orders_join.customer_id;
+*/
+
+SELECT *
+FROM customers
+         LEFT JOIN orders_join
+                   ON customers.customer_id = orders_join.customer_id;
+/*
+This query will combine data from the "customers" table and the "orders" table, and return all columns from both
+tables where the customer_id column in the "customers" table matches the customer_id column in the "orders" table.
+However, it will also return all the rows from the "customers" table, even if there is no match in the "orders" table.
+The result set will contain NULL values for all columns from the "orders" table for the non-matching rows from the
+"customers" table.
+
+You can think of a LEFT JOIN as an union of two tables, where all the rows from the left table are included in the
+result set and the matching rows from the right table are included. If a row from left table does not have a match in
+the right table, the non-matching fields will be filled with NULL values.
+
+You can use the LEFT JOIN to combine data from three tables as well. Let's look at an example:
+
+SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
+FROM orders_join
+LEFT JOIN customers
+ON orders_join.customer_id = customers.customer_id
+LEFT JOIN products
+ON orders_join.product_id = products.product_id;
+*/
+
+SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
+FROM orders_join
+         LEFT JOIN customers
+                   ON orders_join.customer_id = customers.customer_id
+         LEFT JOIN products
+                   ON orders_join.product_id = products.product_id;
+
+/*
+This query will combine data from the "orders" table, the "customers" table, and the "products" table by joining them
+based on the customer_id and product_id columns, respectively. It will return all columns from all three tables where
+the customer_id column in the "orders" table matches the customer_id column in the "customers" table, and product_id
+column in the "orders" table matches the product_id column in the "products" table.
+
+However, it will also return all the rows from the "orders" table, even if there is no match in the "customers" table
+or in the "products" table. The result set will contain NULL values for the first_name, last_name, and product_name
+columns from the "customers" and "products" table for the non-matching rows from the "orders" table.
+
+It is important to notice that since the orders table is the left table, all the rows will be in the result set, so
+even if there is no match between the order, customer and product, the order will be in the results, with NULL values
+in the customer and product columns.
+*/
+
+-- Perform a left join on the join_accounts and join_orders tables. The join should be on the account_id column in
+-- join_orders and the id column in join_accounts. The final table should have three columns: id, name, and total.
+SELECT a.id, a.name, o.total
+FROM join_accounts a
+         LEFT JOIN join_orders o ON a.id = o.account_id;
 
 
 
