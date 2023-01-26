@@ -111,3 +111,21 @@ The result of this query is the same as the previous query, except that we only 
 occurred_at columns.
 */
 
+/*
+LIMIT
+The LIMIT statement is useful when you want to see just the first few rows of a table.
+The LIMIT command is always the very last part of a query.
+
+For example, if we wanted to see the first 5 rows of the orders table, we could write the following query:
+SELECT *
+FROM orders
+LIMIT 5;
+*/
+
+-- select the first 10 rows from the orders table and return the id, account_id, and occurred_at columns
+SELECT id, account_id, occurred_at
+FROM orders
+LIMIT 10;
+/*
+The result of this query is the same as the previous query, except that the result only contains the first 10 rows
+*/
