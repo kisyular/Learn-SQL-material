@@ -667,3 +667,47 @@ This query will return only the rows where there are matches in all three tables
 have a matching order it will not be in the results, so it only returns the records where there is a match between
 customer, product and order in the respective id columns.
 */
+
+
+/*
+Let's look at another example. We have a table of join_accounts and a table of join_orders. We can use the account_id
+column in the "join_orders" table to combine it with the "join_accounts" table.
+*/
+
+-- create a table called join_accounts with column id and name
+CREATE TABLE join_accounts
+(
+    id   INTEGER PRIMARY KEY,
+    name TEXT
+);
+-- insert data into join_accounts
+INSERT INTO join_accounts (id, name)
+VALUES (1001, 'Walmart'),
+       (1011, 'Exxon Mobil'),
+       (1021, 'Apple');
+
+-- create a table called join_orders with column id, account_id, and total
+CREATE TABLE join_orders
+(
+    id         INTEGER PRIMARY KEY,
+    account_id INTEGER,
+    total      INTEGER
+);
+-- insert data into join_orders
+INSERT INTO join_orders (id, account_id, total)
+VALUES (1, 1001, 169),
+       (2, 1001, 288),
+       (17, 1011, 541),
+       (18, 1021, 539),
+       (19, 1021, 558),
+       (24, 1031, 1363);
+
+
+-- Pull data for join_accounts
+SELECT *
+FROM join_accounts;
+
+
+-- Pull data for join_orders
+SELECT *
+FROM join_orders;
