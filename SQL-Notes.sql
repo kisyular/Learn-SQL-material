@@ -129,3 +129,74 @@ LIMIT 10;
 /*
 The result of this query is the same as the previous query, except that the result only contains the first 10 rows
 */
+
+/*
+ORDER BY
+The ORDER BY statement allows us to sort our results using the data in any column.
+The ORDER BY statement always comes in a query after the SELECT and FROM statements, but before the LIMIT statement.
+*/
+
+/*
+For example, if we wanted to see the first 10 rows of the orders table, sorted by the occurred_at column, we could
+write the following query:
+SELECT *
+FROM orders
+ORDER BY occurred_at
+*/
+
+-- select the first 100 rows from the orders table order by occurred_at in descending order
+SELECT *
+FROM orders
+ORDER BY occurred_at DESC
+LIMIT 100;
+
+
+-- the 15 earliest orders in the orders table. Include the id, occurred_at, and total_amt_usd
+SELECT id, occurred_at, total_amt_usd
+FROM orders
+ORDER BY occurred_at
+LIMIT 15;
+/*
+The result is sorted by the occurred_at column in ascending order. The earliest order is at the top of the table.
+*/
+
+
+-- the top 20 orders in terms of largest total_amt_usd. Include the id, account_id, and total_amt_usd columns
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY total_amt_usd DESC
+LIMIT 20;
+
+-- the lowest 20 orders in terms of smallest total_amt_usd. Include the id, account_id, and total_amt_usd columns
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY total_amt_usd
+LIMIT 20;
+
+-- Include the id, account_id, and total_amt_usd columns, limit the results to 10 rows, and order by both account_id
+-- and total_amt_usd in descending order
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY account_id DESC, total_amt_usd DESC
+LIMIT 5;
+
+-- query that displays the order ID, account ID, and total dollar amount for all the orders, sorted first by the
+-- account ID (in ascending order), and then by the total dollar amount (in descending order).
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY account_id, total_amt_usd DESC
+LIMIT 5;
+
+-- query that displays the order ID, account ID, and total dollar amount for all the orders, sorted first by the total
+-- dollar amount (in descending order), and then by the account ID (in ascending order). Limit the results to 15 rows.
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY total_amt_usd DESC, account_id
+LIMIT 15;
+/*
+The result is sorted by the total_amt_usd column in descending order, and then by the account_id column in
+ascending order. We can use multiple columns in the ORDER BY statement to sort by multiple columns.
+*/
+
+
+
