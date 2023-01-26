@@ -711,3 +711,25 @@ FROM join_accounts;
 -- Pull data for join_orders
 SELECT *
 FROM join_orders;
+
+
+-- Perform an inner join on the join_accounts and join_orders tables. The join should be on the account_id column in
+-- join_orders and the id column in join_accounts. The final table should have three columns: id, name, and total.
+SELECT a.id, a.name, o.total
+FROM join_accounts a
+         JOIN join_orders o ON a.id = o.account_id;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
