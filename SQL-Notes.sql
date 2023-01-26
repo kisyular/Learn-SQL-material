@@ -535,5 +535,59 @@ FROM region r
 ORDER BY r.name DESC;
 
 
+-- Lets create a customer table
+CREATE TABLE customers
+(
+    customer_id INT PRIMARY KEY,
+    first_name  VARCHAR(255) NOT NULL,
+    last_name   VARCHAR(255) NOT NULL,
+    email       VARCHAR(255) NOT NULL,
+    address     VARCHAR(255) NOT NULL
+);
+
+-- Insert data into the customers table
+INSERT INTO customers (customer_id, first_name, last_name, email, address)
+VALUES (1, 'John', 'Doe', 'johndoe@example.com', '123 Main St.'),
+       (2, 'Jane', 'Doe', 'janedoe@example.com', '456 Park Ave.'),
+       (3, 'Bob', 'Smith', 'bobsmith@example.com', '789 Elm St.');
+
+-- Create products table
+CREATE TABLE products
+(
+    product_id    INT PRIMARY KEY,
+    product_name  VARCHAR(255)   NOT NULL,
+    product_price DECIMAL(10, 2) NOT NULL
+);
+
+-- Insert data into the products table
+INSERT INTO products (product_id, product_name, product_price)
+VALUES (1, 'Product 1', 10.00),
+       (2, 'Product 2', 20.00),
+       (3, 'Product 3', 30.00),
+       (4, 'Product 4', 40.00),
+       (5, 'Product 5', 50.00);
+
+
+-- Create a table for orders
+CREATE TABLE orders_join
+(
+    order_id    INT PRIMARY KEY,
+    customer_id INT            NOT NULL,
+    product_id  INT            NOT NULL,
+    order_date  DATE           NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
+    FOREIGN KEY (product_id) REFERENCES products (product_id)
+);
+
+-- Insert data into the orders table
+INSERT INTO orders_join (order_id, customer_id, product_id, order_date, total_price)
+VALUES (1, 1, 1, '2022-01-01', 100.00),
+       (2, 2, 2, '2022-01-02', 50.00),
+       (3, 1, 3, '2022-01-03', 75.00),
+       (4, 3, 1, '2022-01-04', 200.00),
+       (5, 2, 5, '2022-01-05', 100.00),
+       (6, 3, 4, '2022-01-06', 80.00);
+
 
 
