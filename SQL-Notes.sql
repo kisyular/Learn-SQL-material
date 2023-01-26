@@ -589,5 +589,81 @@ VALUES (1, 1, 1, '2022-01-01', 100.00),
        (5, 2, 5, '2022-01-05', 100.00),
        (6, 3, 4, '2022-01-06', 80.00);
 
+/*
+INNER JOIN
+An INNER JOIN in SQL is used to combine rows from two or more tables based on a related column between them.
+The result of an INNER JOIN only includes rows where there is a match in both tables.
+For example, if we have a table of customers and a table of orders, we can use the customer_id column to combine
+the two tables and only include orders where there is a matching customer_id.
+Example:
+SELECT *
+FROM customers
+INNER JOIN orders
+ON customers.customer_id = orders.customer_id;
+*/
+
+SELECT c.customer_id, c.first_name, c.last_name, o.order_id, o.order_date, o.total_price
+FROM orders_join as o
+         INNER JOIN customers as c
+                    ON o.customer_id = c.customer_id;
+/*
+This SQL statement combines data from the "orders" table and the "customers" table, and returns all columns from both
+tables where the customer_id column in the "orders" table matches the customer_id column in the "customers" table. It
+returns only the matching row from both tables.
+*/
+
+SELECT c.customer_id, c.first_name, c.last_name, o.order_id, o.order_date, o.total_price
+FROM orders_join as o
+         JOIN customers as c
+              ON o.customer_id = c.customer_id;
+-- It would give the same result.
+
+/*
+You can think of an INNER JOIN as an intersection of two tables, meaning it returns only the rows where there is a
+match in both tables.
+
+You can also use the JOIN keyword instead of the INNER JOIN, since INNER JOIN is the default behaviour.
+
+To learn more about INNER JOIN, let's look at a more complex example. We have a table of customers, a table of
+orders, and a table of products. We can use the customer_id column in the "orders" table to combine it with the
+"customers" table, and the product_id column in the "orders" table to combine it with the "products" table.
+*/
+
+SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
+FROM customers
+         INNER JOIN orders_join
+                    ON customers.customer_id = orders_join.customer_id
+         INNER JOIN products
+                    ON orders_join.product_id = products.product_id;
+/*
+The query I provided uses INNER JOIN to combine data from three tables: customers, orders, and products. The query
+returns the first_name, last_name, order_date and product_name of all customers along with the products they ordered.
+*/
 
 
+SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
+FROM customers
+         INNER JOIN orders_join
+                    ON customers.customer_id = orders_join.customer_id
+         INNER JOIN products
+                    ON orders_join.product_id = products.product_id;
+/*
+Here is how the query works step-by-step:
+
+The query starts by selecting the first_name, last_name, order_date and product_name columns from the customers table.
+
+Then it uses the INNER JOIN keyword to combine the customers table with the orders table. The ON clause specifies that
+the join should be based on the customer_id column of the customers table matching the customer_id column of the orders
+table.
+
+After that, it uses another INNER JOIN keyword to combine the orders table with the products table. The ON clause
+specifies that the join should be based on the product_id column of the orders table matching the product_id column of
+the products table.
+
+The final result of the query will be the customer first_name, last_name, order_date and product_name that only have
+matches on the customer_id and product_id in customers, orders, and products table.
+
+This query will return only the rows where there are matches in all three tables. If a customer or a product does not
+have a matching order it will not be in the results, so it only returns the records where there is a match between
+customer, product and order in the respective id columns.
+*/
