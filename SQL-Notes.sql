@@ -878,7 +878,6 @@ result set will contain NULL values for all columns from the other table for the
 -- Perform a full join on the customers, orders, and products tables. The join should be on the customer_id column in
 -- orders and the customer_id column in customers, and the product_id column in orders and the product_id column in
 -- products. The final table should have four columns: first_name, last_name, order_date, and product_name.
-
 SELECT customers.first_name, customers.last_name, orders_join.order_date, products.product_name
 FROM customers
          FULL JOIN orders_join
@@ -951,7 +950,6 @@ FROM Country
 -- Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for
 -- the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the
 -- account name. Sort the accounts alphabetically (A-Z) according to account name.
-
 SELECT region.name, sales_reps.name, accounts.name
 FROM region
          JOIN sales_reps
@@ -965,7 +963,6 @@ ORDER BY accounts.name;
 -- accounts where the sales rep has a first name starting with S and in the Midwest region. Your final table should
 -- include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically
 -- (A-Z) according to account name.
-
 SELECT region.name, sales_reps.name, accounts.name
 FROM region
          JOIN sales_reps
@@ -980,7 +977,6 @@ ORDER BY accounts.name;
 -- accounts where the sales rep has a last name starting with K and in the Midwest region. Your final table should
 -- include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically
 -- (A-Z) according to account name.
-
 SELECT region.name, sales_reps.name, accounts.name
 FROM region
          JOIN sales_reps
@@ -995,7 +991,6 @@ ORDER BY accounts.name;
 -- (total_amt_usd/total) for the order. However, you should only provide the results if the standard order quantity
 -- exceeds 100. Your final table should have 3 columns: region name, account name, and unit price. In order to avoid
 -- a division by zero error, adding .01 to the denominator here is helpful total_amt_usd/(total+0.01).
-
 SELECT region.name, accounts.name, total_amt_usd / (total + 0.01) AS unit_price
 FROM region
          JOIN sales_reps
@@ -1011,7 +1006,6 @@ WHERE orders.standard_qty > 100;
 -- exceeds 100 and the poster order quantity exceeds 50. Your final table should have 3 columns: region name, account
 -- name, and unit price. Sort for the smallest unit price first. In order to avoid a division by zero error, adding .01
 -- to the denominator here is helpful (total_amt_usd/(total+0.01).
-
 SELECT region.name, accounts.name, total_amt_usd / (total + 0.01) AS unit_price
 FROM region
          JOIN sales_reps
@@ -1026,7 +1020,6 @@ ORDER BY unit_price;
 
 -- What are the different channels used by account id 1001? Your final table should have only 2 columns: account name
 -- and the different channels. You can try SELECT DISTINCT to narrow down the results to only the unique values.
-
 SELECT DISTINCT accounts.name, web_events.channel
 FROM accounts
          JOIN web_events
@@ -1050,7 +1043,6 @@ WHERE accounts.id = 1001;
 -- total, and order total_amt_usd.
 -- Hint: You can use the EXTRACT function to extract the year from the occurred_at column.
 -- EXTRACT(YEAR FROM occurred_at) AS year
-
 SELECT orders.occurred_at, accounts.name, orders.total, orders.total_amt_usd
 FROM accounts
          JOIN orders
@@ -1058,7 +1050,159 @@ FROM accounts
 WHERE EXTRACT(YEAR FROM orders.occurred_at) = 2015;
 
 
+/*
+SQL AGGREGATE FUNCTIONS
+----------------------------------------------------------------------------------------------------------------------
+In SQL, aggregate functions are used to perform calculations on a set of values and return a single value. Some common
+aggregate functions include:
 
+COUNT() - returns the number of rows in a table or the number of non-NULL values in a column
+SUM() - returns the sum of all non-NULL values in a column
+AVG() - returns the average of all non-NULL values in a column
+MIN() - returns the minimum value in a column
+MAX() - returns the maximum value in a column
+These functions are typically used in combination with a GROUP BY clause to group the results by one or more columns.
+For example, you could use the SUM() function to find the total sales for each region, by grouping the results by the
+region column.
+
+It's worth noting that some databases have additional aggregate functions that may not be supported by other databases.
+FOR EXAMPLE:
+SELECT COUNT(*) FROM orders;
+SELECT SUM(total) FROM orders;
+SELECT AVG(total) FROM orders;
+SELECT MIN(total) FROM orders;
+SELECT MAX(total) FROM orders;
+SELECT region, SUM(total) as total_sales FROM orders GROUP BY region;
+
+The COUNT() function returns the number of rows in a table or the number of non-NULL values in a column. The following
+SQL statement returns the number of rows in the orders table:
+SELECT COUNT(*) FROM orders;
+
+When performing calculations on a set of values, it's important to remember that NULL values are ignored. The following
+SQL statement returns the number of non-NULL values in the total column of the orders table:
+SELECT COUNT(total) FROM orders;
+
+
+What are NULL values?
+NULL values are special values that indicate that a value is missing or unknown. NULL values are ignored when
+calculating aggregate values. For example, if you use the SUM() function to calculate the total sales for each
+region, the result will not include any NULL values in the total column.
+
+There are two common ways in which you are likely to encounter NULLs:
+
+-- NULLs frequently occur when performing a LEFT or RIGHT JOIN. You saw in the last lesson - when some rows in the left
+table of a left join are not matched with rows in the right table, those rows will contain some NULL values in the
+result set.
+
+-- NULLs can also occur from simply missing data in our database.
+To check for NULL values, you can use the IS NULL operator. For example, the following SQL statement returns all
+orders where the total column is NULL:
+SELECT * FROM orders WHERE total IS NULL;
+*/
+
+
+/*
+COUNT() - returns the number of rows in a table or the number of non-NULL values in a column
+*/
+
+-- How many orders were placed in 2015? Your final table should have 1 column: count.
+SELECT COUNT(*) as order_placed_in_2015
+FROM orders
+WHERE EXTRACT(YEAR FROM occurred_at) = 2015;
+
+/*
+Notice that COUNT does not consider rows that have NULL values. Therefore, this can be useful for quickly identifying
+which rows have missing data. You will learn GROUP BY in an upcoming concept, and then each of these aggregators will
+become much more useful.
+*/
+
+-- Find the number of orders placed by each customer and the total amount spent by each customer. Your final table
+-- should have 4 columns: customer_id, name, count, and sum. The name column should be the both the customer's first
+-- name and last name, separated by a space.
+SELECT customers.customer_id,
+       customers.first_name || ' ' || customers.last_name as name,
+       COUNT(orders_join.order_id),
+       SUM(orders_join.total_price)
+FROM customers
+         JOIN orders_join
+              ON customers.customer_id = orders_join.customer_id
+GROUP BY customers.customer_id;
+
+/*
+SUM() - returns the sum of all non-NULL values in a column
+An important thing to remember: aggregators only aggregate vertically - the values of a column. They do not aggregate
+horizontally - the values of a row.
+*/
+
+-- Find the total amount of poster_qty paper ordered in the orders table.
+SELECT SUM(poster_qty) as total_poster_qty
+FROM orders;
+
+-- Find the total amount of standard_qty paper ordered in the orders table.
+SELECT SUM(standard_qty) as total_standard_qty
+FROM orders;
+
+-- Find the total dollar amount of sales using the total_amt_usd in the orders table.
+SELECT SUM(total_amt_usd) as total_dollar_amount
+FROM orders;
+
+-- Find the total amount spent on standard_amt_usd and gloss_amt_usd paper for each order in the orders table.
+-- This should give a dollar amount for each order in the table.
+SELECT orders.id, SUM(standard_amt_usd + gloss_amt_usd) as total_dollar_amount
+FROM orders
+GROUP BY orders.id;
+
+-- Find the standard_amt_usd per unit of standard_qty paper. Your solution should use both an aggregation and a
+-- mathematical operator.
+SELECT SUM(standard_amt_usd) / SUM(standard_qty + 0.01) as standard_amt_usd_per_unit
+FROM orders;
+
+
+/*
+MAX and MIN
+MAX() - returns the maximum value in a column
+MIN() - returns the minimum value in a column
+These functions can be used to get the earliest or latest date in a table, the highest or lowest value in a column or
+the values alphabetically.
+*/
+
+/*
+AVG() - returns the average of all non-NULL values in a column
+*/
+
+
+-- When was the earliest order ever placed? You only need to return the date.
+SELECT MIN(occurred_at) as earliest_order
+FROM orders;
+
+-- Try performing the same query as in question 1 without using an aggregation function.
+SELECT occurred_at as earliest_order
+FROM orders
+ORDER BY occurred_at
+LIMIT 1;
+
+-- When did the most recent (latest) web_event occur? You only need to return the date.
+SELECT MAX(occurred_at) as latest_web_event
+FROM web_events;
+
+-- Find the mean (AVERAGE) amount spent per order on each paper type, as well as the mean amount of each paper type
+-- purchased per order. Your final answer should have 6 values - one for each paper type for the average number of
+-- sales, as well as the average amount.
+
+SELECT AVG(standard_qty)     as avg_standard_qty,
+       AVG(gloss_qty)        as avg_gloss_qty,
+       AVG(poster_qty)       as avg_poster_qty,
+       AVG(standard_amt_usd) as avg_standard_amt_usd,
+       AVG(gloss_amt_usd)    as avg_gloss_amt_usd,
+       AVG(poster_amt_usd)   as avg_poster_amt_usd
+FROM orders;
+
+-- What is the MEDIAN total_usd spent on all orders?
+-- The median is the middle value in a sorted list of values. If there is an even number of values, the median is the
+-- average of the two middle values.
+
+SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_amt_usd) as median_total_usd
+FROM orders;
 
 
 
