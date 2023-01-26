@@ -427,7 +427,32 @@ the primary key.
 */
 
 
+/*
+ENTITY RELATIONSHIP DIAGRAMS
+From the last lesson, you might remember that an entity relationship diagram (ERD) is a common way to view data in a
+database. It is also a key element to understanding how we can pull data from multiple tables.
 
+If you look a little closer, you might notice that the PK is associated with the first column in every table. The PK
+here stands for primary key. A primary key exists in every table, and it is a column that has a unique value for every
+row.
+
+PRIMARY KEY (PK)
+A primary key is a unique column in a particular table. This is the first column in each of our tables. Here, those
+columns are all called id, but that doesn't necessarily have to be the name. It is common that the primary key is the
+first column in our tables in most databases.
+
+FOREIGN KEY (FK)
+A foreign key is a column in one table that is a primary key in a different table. We can see in the Parch & Posey
+ERD that the foreign keys are:
+region_id
+account_id
+sales_rep_id
+
+That's right! Foreign keys are always associated with a primary key, and they are associated with the crow-foot notation
+above to show they can appear multiple times in a particular table.
+
+Then in the ON, we will ALWAYS have the PK equal to the FK:
+*/
 
 
 
