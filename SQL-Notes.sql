@@ -1324,3 +1324,73 @@ GROUP BY region.name, web_events.channel
 ORDER BY total_web_events DESC;
 
 
+/*
+DISTINCT
+-------------------------------------------------------------------------------------------------------------------
+The DISTINCT keyword is used to return only distinct (different) values. For example, if you have a table of
+orders that contains multiple rows for each customer, and you want to find the total number of orders and the
+total value of all orders for each customer. You could use the GROUP BY clause to group the rows by the
+customer_id column, and then use the COUNT and SUM functions to find the number of orders and the total value
+of all orders for each group of rows:
+SELECT customer_id, COUNT(*), SUM(total_amt_usd)
+FROM orders
+GROUP BY customer_id;
+
+However, if you want to find the total number of orders and the total value of all orders for all customers, you
+can use the DISTINCT keyword to find the number of unique customer_id values and the total value of all orders
+for all customers:
+SELECT COUNT(DISTINCT customer_id), SUM(total_amt_usd)
+FROM orders;
+
+The DISTINCT keyword can be used with any column or expression in a SELECT statement. For example, if you want
+to find the number of unique values in the channel column of the web_events table, you can use the following
+query:
+SELECT COUNT(DISTINCT channel)
+FROM web_events;
+
+The DISTINCT keyword can also be used with multiple columns or expressions. For example, if you want to find the
+number of unique combinations of channel and account_id values in the web_events table, you can use the
+following query:
+SELECT COUNT(DISTINCT channel, account_id)
+FROM web_events;
+
+The DISTINCT keyword can be used with the GROUP BY clause. For example, if you want to find the number of
+unique values in the channel column of the web_events table for each account, you can use the following query:
+SELECT account_id, COUNT(DISTINCT channel)
+FROM web_events
+GROUP BY account_id;
+*/
+
+-- Use DISTINCT to test if there are any accounts associated with more than one region.
+SELECT region.id as region_id, accounts.id as account_id, accounts.name as account_name, region.name as region_name
+FROM accounts
+         JOIN sales_reps
+              ON accounts.sales_rep_id = sales_reps.id
+         JOIN region
+              ON sales_reps.region_id = region.id;
+-- With DISTINCT
+SELECT DISTINCT id, name
+FROM accounts;
+/*
+From the result, we can see that there are no accounts associated with more than one region. If each account was
+associated with more than one region, the first query should have returned more rows than the second query.
+*/
+
+
+-- Have any sales reps worked on more than one account?
+SELECT sales_reps.id, sales_reps.name, COUNT( accounts.id) as num_accounts
+FROM sales_reps
+         JOIN accounts
+              ON sales_reps.id = accounts.sales_rep_id
+GROUP BY sales_reps.id, sales_reps.name
+ORDER BY num_accounts DESC;
+
+-- Let's use DISTINCT
+SELECT DISTINCT sales_reps.id, sales_reps.name
+FROM sales_reps;
+/*
+ Actually all of the sales reps have worked on more than one account. The fewest number of accounts any sales rep
+ works on is 3.
+ */
+
+
