@@ -1519,3 +1519,97 @@ ORDER BY num_events DESC
 LIMIT 1;
 
 
+/*
+DATE FUNCTIONS
+-------------------------------------------------------------------------------------------------------------------
+PostgreSQL provides a variety of date and time functions for manipulating and working with date and time values. Some commonly used date functions include:
+
+CURRENT_DATE returns the current date.
+CURRENT_TIME returns the current time.
+CURRENT_TIMESTAMP returns the current date and time.
+NOW() returns the current date and time.
+EXTRACT(field FROM date) extracts a specific field (such as year, month, or day) from a date or time value.
+DATE_TRUNC(field, date) truncates a date or time value to a specific field (such as year or month).
+AGE(date1, date2) calculates the age (in years) between two date or time values.
+DATE_PART(field, date) returns the specified field of a date or time value.
+
+*/
+
+-- What is the current date?
+SELECT CURRENT_DATE;
+
+-- What is the current time?
+SELECT CURRENT_TIME;
+
+-- Add 10 days to the occurred_at date of the orders table.
+SELECT occurred_at, occurred_at + INTERVAL '10 days' as occurred_at_plus_10_days
+FROM orders;
+
+-- Which day of the week did the most orders occur on using DATE_PART?
+SELECT DATE_PART('dow', occurred_at) as day_of_week, COUNT(id) as num_orders
+FROM orders
+GROUP BY day_of_week
+ORDER BY num_orders DESC;
+
+-- Find the sales in terms of total dollars for all orders in each year, ordered from greatest to least. Do you notice
+-- any trends in the yearly sales totals?
+SELECT EXTRACT(year FROM occurred_at) as year, SUM(total_amt_usd) as total_sales
+FROM orders
+GROUP BY year
+ORDER BY total_sales DESC;
+/*
+When we look at the yearly totals, you might notice that 2013 and 2017 have much smaller totals than all other years.
+If we look further at the monthly data, we see that for 2013 and 2017 there is only one month of sales for each of
+these years (12 for 2013 and 1 for 2017). Therefore, neither of these are evenly represented. Sales have been
+increasing year over year, with 2016 being the largest sales to date. At this rate, we might expect 2017 to have the
+largest sales.
+*/
+
+-- Which month did Parch & Posey have the greatest sales in terms of total dollars? Are all months evenly represented
+-- by the dataset?
+SELECT EXTRACT(month FROM occurred_at) as month, SUM(total_amt_usd) as total_sales
+FROM orders
+WHERE occurred_at BETWEEN '2014-01-01' AND '2017-01-01'
+GROUP BY month
+ORDER BY total_sales DESC;
+/*
+The greatest sales amounts occur in December (12).
+*/
+
+-- Which year did Parch & Posey have the greatest sales in terms of total number of orders? Are all years evenly
+-- represented by the dataset? Use the DATE_PART function.
+SELECT DATE_PART('year', occurred_at) as year, COUNT(id) as num_orders
+FROM orders
+GROUP BY year
+ORDER BY num_orders DESC;
+/*
+Again, 2016 by far has the most amount of orders, but again 2013 and 2017 are not evenly represented to the other
+years in the dataset.
+*/
+
+-- Which month did Parch & Posey have the greatest sales in terms of total number of orders? Are all months evenly
+-- represented by the dataset? Use the DATE_PART function.
+SELECT DATE_PART('month', occurred_at) as month, COUNT(id) as num_orders
+FROM orders
+WHERE occurred_at BETWEEN '2014-01-01' AND '2017-01-01'
+GROUP BY 1
+ORDER BY 2 DESC;
+/*
+December still has the most sales, but interestingly, November has the second most sales (but not the most dollar
+sales. To make a fair comparison from one month to another 2017 and 2013 data were removed.
+*/
+
+-- In which month of which year did Walmart spend the most on gloss paper in terms of dollars?
+SELECT EXTRACT(year FROM occurred_at) as year, EXTRACT(month FROM occurred_at) as month,
+       SUM(total_amt_usd) as total_sales
+FROM orders
+         JOIN accounts
+              ON orders.account_id = accounts.id
+WHERE accounts.name = 'Walmart'
+GROUP BY year, month
+ORDER BY total_sales DESC
+LIMIT 1;
+
+
+
+
