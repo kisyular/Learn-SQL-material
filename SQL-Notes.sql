@@ -13,6 +13,7 @@ will use from Parch & Posey. These diagrams help you visualize the data you are 
 
 
 /*
+DATABASES WE WILL USE
 In the Parch & Posey database there are five tables (essentially 5 spreadsheets):
     -- web_events
     -- accounts
@@ -122,10 +123,10 @@ FROM orders
 LIMIT 5;
 */
 
--- select the first 10 rows from the orders table and return the id, account_id, and occurred_at columns
+-- select the first 15 rows from the orders table and return the id, account_id, and occurred_at columns
 SELECT id, account_id, occurred_at
 FROM orders
-LIMIT 10;
+LIMIT 15;
 /*
 The result of this query is the same as the previous query, except that the result only contains the first 10 rows
 */
@@ -144,11 +145,11 @@ FROM orders
 ORDER BY occurred_at
 */
 
--- select the first 100 rows from the orders table order by occurred_at in descending order
+-- select the first 15 rows from the orders table order by occurred_at in descending order
 SELECT *
 FROM orders
 ORDER BY occurred_at DESC
-LIMIT 100;
+LIMIT 18;
 
 
 -- the 15 earliest orders in the orders table. Include the id, occurred_at, and total_amt_usd
@@ -158,6 +159,7 @@ ORDER BY occurred_at
 LIMIT 15;
 /*
 The result is sorted by the occurred_at column in ascending order. The earliest order is at the top of the table.
+Sorting allows us to see the data in a different way than we would have seen it otherwise.
 */
 
 
@@ -166,6 +168,7 @@ SELECT id, account_id, total_amt_usd
 FROM orders
 ORDER BY total_amt_usd DESC
 LIMIT 20;
+
 
 -- the lowest 20 orders in terms of smallest total_amt_usd. Include the id, account_id, and total_amt_usd columns
 SELECT id, account_id, total_amt_usd
@@ -238,11 +241,12 @@ WHERE name = 'Exxon Mobil';
 -- For example, if we wanted to see the total amount of sales for each account, we could write the following query:
 SELECT id, account_id, total_amt_usd, total_amt_usd * 10 AS total_amt_eur
 FROM orders
-LIMIT 10;
+LIMIT 20;
 /*
  The result of this query is the same as the previous query, except that we have added a new column called
  total_amt_eur. This column is a derived column, because it is created from the total_amt_usd multiplied by 10.
 */
+
 
 --Create a column that divides the standard_amt_usd by the standard_qty to find the unit price for standard paper for
 -- each order. Limit the results to the first 10 orders, and include the id and account_id fields.
@@ -289,7 +293,8 @@ WHERE name IN ('Walmart', 'Target', 'Nordstrom');
 SELECT *
 FROM web_events
 WHERE channel IN ('organic', 'adwords')
-LIMIT 5;
+LIMIT 25;
+
 
 -- Use the accounts table to find the account name, primary poc, and sales rep id for all stores except Walmart, Target,
 -- and Nordstrom.
@@ -297,12 +302,14 @@ SELECT name, primary_poc, sales_rep_id
 FROM accounts
 WHERE name NOT IN ('Walmart', 'Target', 'Nordstrom');
 
+
+
 -- Use the web_events table to find all information regarding individuals who were contacted via any method except using
 -- organic or adwords methods.
 SELECT *
 FROM web_events
-WHERE channel NOT IN ('organic', 'adwords');
-
+WHERE channel NOT IN ('organic', 'adwords')
+LIMIT 5;
 
 -- All the companies whose names do not start with 'C'.
 SELECT *
@@ -348,14 +355,17 @@ ORDER BY occurred_at DESC;
 SELECT id
 FROM orders
 WHERE gloss_qty > 4000
-   OR poster_qty > 4000;
+   OR poster_qty > 4000
+LIMIT 5;
 
 -- Write a query that returns a list of orders where the standard_qty is zero and either the gloss_qty or poster_qty is
 -- over 1000.
 SELECT *
 FROM orders
 WHERE standard_qty = 0
-  AND (gloss_qty > 1000 OR poster_qty > 1000);
+  AND (gloss_qty > 1000 OR poster_qty > 1000)
+LIMIT 5;
+
 
 -- Find all the company names that start with a 'C' or 'W', and the primary contact contains 'ana' or 'Ana', but
 -- it doesn't contain 'eana'.
@@ -487,7 +497,6 @@ SELECT orders.standard_qty, orders.gloss_qty, orders.poster_qty, accounts.websit
 FROM accounts
          JOIN orders ON accounts.id = orders.account_id;
 
-
 -- pull data from web_events, accounts, and orders tables using a JOIN.
 SELECT web_events.*, accounts.*, orders.*
 FROM web_events
@@ -588,7 +597,6 @@ VALUES (1, 1, 1, '2022-01-01', 100.00),
        (4, 3, 1, '2022-01-04', 200.00),
        (5, 2, 5, '2022-01-05', 100.00),
        (6, 3, 4, '2022-01-06', 80.00);
-
 /*
 INNER JOIN
 An INNER JOIN in SQL is used to combine rows from two or more tables based on a related column between them.
@@ -693,6 +701,7 @@ CREATE TABLE join_orders
     account_id INTEGER,
     total      INTEGER
 );
+
 -- insert data into join_orders
 INSERT INTO join_orders (id, account_id, total)
 VALUES (1, 1001, 169),
@@ -899,11 +908,6 @@ even if there is no match between the product, customer and order, the product w
 in the customer and order columns.
 */
 
-
-/*
-QUIZ
-*/
-
 -- Create Country table with countryID, countryName columns.
 CREATE TABLE Country
 (
@@ -972,6 +976,15 @@ FROM region
 WHERE region.name = 'Midwest'
   AND sales_reps.name LIKE 'S%'
 ORDER BY accounts.name;
+/*
+You can that the table is filtered by region "Midwest" and Sales Rep name starting with "S".
+The LIKE operator is used to compare a value to a pattern. The pattern can contain the wildcard characters % and _.
+The % wildcard represents zero, one, or multiple characters. The _ wildcard represents a single character.
+The LIKE operator is case insensitive.
+
+The table is sorted by account name in ascending order.
+*/
+
 
 -- Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for
 -- accounts where the sales rep has a last name starting with K and in the Midwest region. Your final table should
@@ -986,6 +999,11 @@ FROM region
 WHERE region.name = 'Midwest'
   AND sales_reps.name LIKE '% K%'
 ORDER BY accounts.name;
+/*
+You can that the table is filtered by region "Midwest" and Sales Rep last name starting with "K".
+The LIKE operator is used to compare a value to a pattern. The pattern can contain the wildcard characters % and _.
+*/
+
 
 -- Provide the name for each region for every order, as well as the account name and the unit price they paid
 -- (total_amt_usd/total) for the order. However, you should only provide the results if the standard order quantity
@@ -1036,6 +1054,10 @@ FROM accounts
 JOIN web_events
 ON accounts.id = web_events.account_id
 WHERE accounts.id = 1001;
+
+The DISTINCT keyword above is used to return only distinct (different) values. The result set will not contain any
+duplicate values.
+The WHERE clause is used to filter records to return only those that fulfill a specified condition.
 */
 
 
@@ -1134,6 +1156,7 @@ An important thing to remember: aggregators only aggregate vertically - the valu
 horizontally - the values of a row.
 */
 
+
 -- Find the total amount of poster_qty paper ordered in the orders table.
 SELECT SUM(poster_qty) as total_poster_qty
 FROM orders;
@@ -1196,6 +1219,7 @@ SELECT AVG(standard_qty)     as avg_standard_qty,
        AVG(gloss_amt_usd)    as avg_gloss_amt_usd,
        AVG(poster_amt_usd)   as avg_poster_amt_usd
 FROM orders;
+
 
 -- What is the MEDIAN total_usd spent on all orders?
 -- The median is the middle value in a sorted list of values. If there is an even number of values, the median is the
@@ -1403,15 +1427,21 @@ the values of the aggregate functions, rather than the individual rows.
 
 For example, if you want to retrieve the number of orders placed by each customer and only show customers who have
 placed more than 10 orders, you would use a query like this:
-
 SELECT customer_id, COUNT(order_id) as num_orders
 FROM orders
 GROUP BY customer_id
 HAVING COUNT(order_id) > 10;
-
 In this example, the GROUP BY clause groups the rows by customer_id, and the COUNT(order_id) function calculates the
 number of orders for each customer. The HAVING clause filters the results to only show customers who have placed more
 than 10 orders.
+
+You can use the HAVING clause with multiple conditions. For example, if you want to retrieve the number of orders
+placed by each customer and only show customers who have placed more than 10 orders and have a total order value
+greater than $100, you would use a query like this:
+SELECT customer_id, COUNT(order_id) as num_orders, SUM(total_amt_usd) as total_order_value
+FROM orders
+GROUP BY customer_id
+HAVING COUNT(order_id) > 10 AND SUM(total_amt_usd) > 100;
 
 REMEMBER:
 WHERE subsets the returned data based on a logical condition.
@@ -1448,7 +1478,6 @@ FROM accounts
 GROUP BY accounts.id, accounts.name
 ORDER BY num_orders DESC
 LIMIT 1;
-
 
 -- Which accounts spent more than 30,000 usd total across all orders?
 SELECT accounts.id, accounts.name, SUM(orders.total_amt_usd) as total_spent
@@ -1522,7 +1551,8 @@ LIMIT 1;
 /*
 DATE FUNCTIONS
 -------------------------------------------------------------------------------------------------------------------
-PostgreSQL provides a variety of date and time functions for manipulating and working with date and time values. Some commonly used date functions include:
+PostgreSQL provides a variety of date and time functions for manipulating and working with date and time values. Some
+commonly used date functions include:
 
 CURRENT_DATE returns the current date.
 CURRENT_TIME returns the current time.
@@ -1564,6 +1594,11 @@ these years (12 for 2013 and 1 for 2017). Therefore, neither of these are evenly
 increasing year over year, with 2016 being the largest sales to date. At this rate, we might expect 2017 to have the
 largest sales.
 */
+-- SELECT only the year and total sales for only 2013 and 2017 dont use between
+SELECT EXTRACT(year FROM occurred_at) as year,EXTRACT(month FROM occurred_at) as month, SUM(total_amt_usd) as total_sales
+FROM orders
+WHERE EXTRACT(year FROM occurred_at) IN (2013, 2017)
+GROUP BY year,month;
 
 -- Which month did Parch & Posey have the greatest sales in terms of total dollars? Are all months evenly represented
 -- by the dataset?
@@ -1574,7 +1609,11 @@ GROUP BY month
 ORDER BY total_sales DESC;
 /*
 The greatest sales amounts occur in December (12).
+Again, 2013 and 2017 are not evenly represented to the other years in the dataset.
+BETWEEN '2014-01-01' AND '2017-01-01' is used to only look at the years 2014 to 2017 since the BETWEEN operator
+is inclusive, meaning that the start and end values are included in the range.
 */
+
 
 -- Which year did Parch & Posey have the greatest sales in terms of total number of orders? Are all years evenly
 -- represented by the dataset? Use the DATE_PART function.
@@ -1587,6 +1626,19 @@ Again, 2016 by far has the most amount of orders, but again 2013 and 2017 are no
 years in the dataset.
 */
 
+/*
+DIFFERENCE BETWEEN DATE_PART AND EXTRACT
+-------------------------------------------------------------------------------------------------------------------
+The EXTRACT function is a more modern version of the DATE_PART function. The EXTRACT function is more readable and
+is easier to use. The EXTRACT function is preferred over the DATE_PART function.
+
+SELECT DATE_PART('year', occurred_at) as year, COUNT(id) as num_orders
+FROM orders
+GROUP BY year
+ORDER BY num_orders DESC;
+*/
+
+
 -- Which month did Parch & Posey have the greatest sales in terms of total number of orders? Are all months evenly
 -- represented by the dataset? Use the DATE_PART function.
 SELECT DATE_PART('month', occurred_at) as month, COUNT(id) as num_orders
@@ -1597,6 +1649,13 @@ ORDER BY 2 DESC;
 /*
 December still has the most sales, but interestingly, November has the second most sales (but not the most dollar
 sales. To make a fair comparison from one month to another 2017 and 2013 data were removed.
+*/
+
+/*
+SELECT EXTRACT(year FROM occurred_at) as year, COUNT(id) as num_orders
+FROM orders
+GROUP BY year
+ORDER BY num_orders DESC;
 */
 
 -- In which month of which year did Walmart spend the most on gloss paper in terms of dollars?
@@ -1653,7 +1712,7 @@ SELECT account_id, total_amt_usd,
             ELSE 'Small'
        END AS order_level
 FROM orders
-LIMIT 15;
+LIMIT 20;
 
 -- Write a query to display the number of orders in each of three categories, based on the total number of items in
 -- each order. The three categories are: 'At Least 2000', 'Between 1000 and 2000' and 'Less than 1000'.
@@ -1664,6 +1723,21 @@ SELECT CASE WHEN total >= 2000 THEN 'At Least 2000'
        COUNT(id) AS num_orders
 FROM orders
 GROUP BY order_level;
+
+/*
+STEPS TO SOLVE THIS PROBLEM
+The CASE statement checks the value of the "total" column for each row in the "orders" table, and assigns the value
+'At Least 2000' to the "order_level" column if the "total" value is greater than or equal to 2000, 'Between 1000 and
+2000' if the "total" value is greater than or equal to 1000 and less than 2000, and 'Less than 1000' if the "total"
+value is less than 1000.
+
+COUNT() function to count the number of orders for each order_level and the GROUP BY clause to group the result by
+order_level, so that the query returns the number of orders for each order_level.
+
+This query will return a resultset with 2 columns: order_level and num_orders, where order_level can be
+'At Least 2000', 'Between 1000 and 2000', 'Less than 1000' and num_orders will be the count of orders for each
+order_level.
+*/
 
 -- We would like to understand 3 different branches of customers based on the amount associated with their purchases.
 -- The top branch includes anyone with a Lifetime Value (total sales of all orders) greater than 200,000 usd.
