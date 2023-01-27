@@ -1806,6 +1806,123 @@ GROUP BY sales_reps.name
 ORDER BY total_sales DESC;
 
 
+/*
+SQL SUBQUERIES AND TEMPORARY TABLES
+A subquery is a query that is nested inside another query, and it is used to retrieve data that will
+be used by the outer query. A subquery can be used in different clauses of an SQL statement, such as the SELECT, FROM, WHERE, and HAVING clauses.
+
+For example, the following SQL statement uses a subquery in the WHERE clause to retrieve all the
+orders from customers who have placed orders with a total amount greater than 2000:
+*/
+SELECT *
+FROM orders
+WHERE id IN (SELECT id FROM orders
+                     GROUP BY id
+                     HAVING SUM(total) > 2000);
+
+/*
+A temporary table, also known as a derived table or a subtable, is a table that exists only for the duration of a
+single SQL statement. The data in a temporary table is not permanently stored in the database, and it is deleted
+automatically when the session ends.
+
+Temporary tables are useful when you need to store intermediate results of a query that will be used by another query.
+*/
+-- Create a temporary table that an account's name and the total amount of all orders for that account.
+CREATE TEMPORARY TABLE temp_table AS
+SELECT accounts.name, SUM(total_amt_usd) AS total_sales
+FROM orders
+         JOIN accounts
+              ON orders.account_id = accounts.id
+GROUP BY accounts.name;
+
+-- Use the temporary table to find the top 10 accounts by total sales.
+SELECT *
+FROM temp_table
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- Drop the temporary table.
+DROP TABLE temp_table;
+
+-- Create a temporary table that an account's name and the total amount of all orders for that account. Use WITH clause.
+WITH temp_table AS (
+    SELECT accounts.name, SUM(total_amt_usd) AS total_sales
+    FROM orders
+             JOIN accounts
+                  ON orders.account_id = accounts.id
+    GROUP BY accounts.name
+)
+SELECT *
+FROM temp_table
+ORDER BY total_sales DESC
+LIMIT 10;
+
+/*
+This code is using a SQL query that utilizes a subquery with a Common Table Expression (CTE) to create a temporary
+table named temp_table.
+
+The subquery, which is enclosed in parentheses and preceded by the keywords WITH temp_table AS, is joining the orders
+table and accounts table on the account_id column and uses the SUM function to calculate the total sales for each
+account name. The query then groups the results by account name.
+
+The outer query then selects all columns from the temp_table and orders the results by descending total_sales and
+limits the results to the top 10 rows.
+
+The query can be broken down as:
+The subquery creates a temporary table named temp_table by joining the orders table and accounts table on the
+account_id column and calculates the total sales for each account name and groups the results by account name
+The outer query selects all columns from the temp_table and orders the results by descending total_sales
+The final query limits the results to the top 10 rows.
+This query will retrieve the top 10 accounts with the highest total sales.
+*/
+
+/*
+Whenever we need to use existing tables to create a new table that we then want to query again, this is an indication
+that we will need to use some sort of subquery.
+*/
+
+-- Find the number of events that occur for each day for each channel.
+-- Use DATE_TRUNC to extract the day from occurred_at and group by the day and channel.
+SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+FROM web_events
+GROUP BY day, channel
+ORDER BY num_events DESC;
+
+-- Now create a subquery that simply provides all of the data from your first query.
+SELECT *
+FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+      FROM web_events
+      GROUP BY day, channel
+      ORDER BY num_events DESC) AS subquery;
+
+-- Now find the average number of events for each channel. Since you broke out by day earlier, this is giving you an
+-- average per day.
+SELECT channel, AVG(num_events) AS avg_events
+FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+      FROM web_events
+      GROUP BY day, channel
+      ORDER BY num_events DESC) AS subquery
+GROUP BY channel
+ORDER BY avg_events DESC;
+
+
+/*
+SELECT name, order_date
+FROM orders
+WHERE customer_id = (SELECT id
+                     FROM customers
+                     WHERE name = 'John Smith');
+In this example, the subquery is selecting the id from the customers table where the name is 'John Smith'.
+The outer query then uses this result to select the name and order_date from the orders table where the customer_id
+is the result of the subquery.
+*/
+
+
+
+
+
+
+
 
 
 
