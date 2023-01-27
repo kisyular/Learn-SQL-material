@@ -1389,8 +1389,133 @@ ORDER BY num_accounts DESC;
 SELECT DISTINCT sales_reps.id, sales_reps.name
 FROM sales_reps;
 /*
- Actually all of the sales reps have worked on more than one account. The fewest number of accounts any sales rep
- works on is 3.
- */
+Actually all of the sales reps have worked on more than one account. The fewest number of accounts any sales rep
+works on is 3.
+*/
+
+
+/*
+HAVING
+-------------------------------------------------------------------------------------------------------------------
+The HAVING clause in SQL is used in conjunction with the GROUP BY clause in a SELECT statement to filter the results
+of a query based on aggregate functions (such as COUNT, SUM, AVG, etc.). It is used to filter groups of rows based on
+the values of the aggregate functions, rather than the individual rows.
+
+For example, if you want to retrieve the number of orders placed by each customer and only show customers who have
+placed more than 10 orders, you would use a query like this:
+
+SELECT customer_id, COUNT(order_id) as num_orders
+FROM orders
+GROUP BY customer_id
+HAVING COUNT(order_id) > 10;
+
+In this example, the GROUP BY clause groups the rows by customer_id, and the COUNT(order_id) function calculates the
+number of orders for each customer. The HAVING clause filters the results to only show customers who have placed more
+than 10 orders.
+
+REMEMBER:
+WHERE subsets the returned data based on a logical condition.
+WHERE appears after the FROM, JOIN, and ON clauses, but before GROUP BY.
+HAVING appears after the GROUP BY clause, but before the ORDER BY clause.
+HAVING is like WHERE, but it works on logical statements involving aggregations.
+*/
+
+-- How many of the sales reps have more than 5 accounts that they manage?
+SELECT sales_reps.id, sales_reps.name, COUNT(accounts.id) as num_accounts
+FROM sales_reps
+         JOIN accounts
+              ON sales_reps.id = accounts.sales_rep_id
+GROUP BY sales_reps.id, sales_reps.name
+HAVING COUNT(accounts.id) > 5
+ORDER BY num_accounts;
+
+
+-- How many accounts have more than 20 orders?
+SELECT accounts.id, accounts.name, COUNT(orders.id) as num_orders
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+HAVING COUNT(orders.id) > 20
+ORDER BY num_orders;
+
+
+-- Which account has the most orders?
+SELECT accounts.id, accounts.name, COUNT(orders.id) as num_orders
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+ORDER BY num_orders DESC
+LIMIT 1;
+
+
+-- Which accounts spent more than 30,000 usd total across all orders?
+SELECT accounts.id, accounts.name, SUM(orders.total_amt_usd) as total_spent
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+HAVING SUM(orders.total_amt_usd) > 30000
+ORDER BY total_spent;
+
+
+-- Which accounts spent less than 1,000 usd total across all orders?
+SELECT accounts.id, accounts.name, SUM(orders.total_amt_usd) as total_spent
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+HAVING SUM(orders.total_amt_usd) < 1000
+ORDER BY total_spent;
+
+
+-- Which account has spent the most with us?
+SELECT accounts.id, accounts.name, SUM(orders.total_amt_usd) as total_spent
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+ORDER BY total_spent DESC
+LIMIT 1;
+
+
+-- Which account has spent the least with us?
+SELECT accounts.id, accounts.name, SUM(orders.total_amt_usd) as total_spent
+FROM accounts
+         JOIN orders
+              ON accounts.id = orders.account_id
+GROUP BY accounts.id, accounts.name
+ORDER BY total_spent
+LIMIT 1;
+
+
+-- Which accounts used facebook as a channel to contact customers more than 6 times?
+SELECT accounts.id, accounts.name, web_events.channel, COUNT(web_events.id) as num_facebook_events
+FROM accounts
+         JOIN web_events
+              ON accounts.id = web_events.account_id
+GROUP BY accounts.id, accounts.name, web_events.channel
+HAVING web_events.channel = 'facebook' AND COUNT(web_events.id) > 6
+ORDER BY num_facebook_events DESC;
+
+
+-- Which account used facebook most as a channel?
+SELECT accounts.id, accounts.name, web_events.channel, COUNT(web_events.id) as num_facebook_events
+FROM accounts
+         JOIN web_events
+              ON accounts.id = web_events.account_id
+WHERE web_events.channel = 'facebook'
+GROUP BY accounts.id, accounts.name, web_events.channel
+ORDER BY num_facebook_events DESC
+LIMIT 1;
+
+
+-- Which channel was most frequently used by most accounts?
+SELECT web_events.channel, COUNT(web_events.id) as num_events
+FROM web_events
+GROUP BY web_events.channel
+ORDER BY num_events DESC
+LIMIT 1;
 
 
