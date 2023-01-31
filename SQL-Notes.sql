@@ -2007,24 +2007,43 @@ ORDER BY max_sales DESC;
 -- STEP 3: Find the sales_rep in each region with the largest amount of total_amt_usd sales.
 -- Use RANK() OVER to rank the total_amt_usd sales for each region, and then use the rank to find the sales_rep
 -- with the largest total_amt_usd sales for each region.
-SELECT t3.rep_name, t3.region_name, t3.total_sales
-FROM (SELECT t2.region_name,
-             t2.rep_name,
-             t2.total_sales,
-             RANK() OVER (PARTITION BY t2.region_name
-                 ORDER BY t2.total_sales DESC) AS rank
-      FROM (SELECT t1.region_name, t1.rep_name, t1.total_sales
-            FROM (SELECT sales_reps.name AS rep_name, region.name AS region_name, SUM(total_amt_usd) AS total_sales
-                  FROM sales_reps
-                           JOIN accounts
-                                ON accounts.sales_rep_id = sales_reps.id
-                           JOIN orders
-                                ON orders.account_id = accounts.id
-                           JOIN region
-                                ON sales_reps.region_id = region.id
-                  GROUP BY rep_name, region_name
-                  ORDER BY total_sales DESC) AS t1) AS t2) AS t3
-WHERE t3.rank = 1;
+SELECT t3.rep_name, t3.region_name, t3.total_amt
+FROM(SELECT region_name, MAX(total_amt) total_amt
+FROM (SELECT sales_reps.name rep_name, region.name region_name, SUM(orders.total_amt_usd) total_amt
+        FROM sales_reps
+                 JOIN accounts
+                        ON accounts.sales_rep_id = sales_reps.id
+                 JOIN orders
+                        ON orders.account_id = accounts.id
+                 JOIN region
+                        ON sales_reps.region_id = region.id
+        GROUP BY rep_name, region_name) AS t1
+GROUP BY region_name) AS t2
+         JOIN (SELECT sales_reps.name rep_name, region.name region_name, SUM(orders.total_amt_usd) total_amt
+               FROM sales_reps
+                        JOIN accounts
+                             ON accounts.sales_rep_id = sales_reps.id
+                        JOIN orders
+                             ON orders.account_id = accounts.id
+                        JOIN region
+                             ON sales_reps.region_id = region.id
+               GROUP BY rep_name, region_name
+               ORDER BY total_amt DESC) AS t3
+              ON t2.region_name = t3.region_name AND t2.total_amt = t3.total_amt;
+
+/*
+The code is a SQL query that returns the name of the sales representative (rep_name), the name of the region
+(region_name), and the total amount (total_amt) for each region where the sum of the total_amt_usd from the orders
+table is the maximum among all the representatives.
+
+The query uses nested subqueries and multiple joins. It first performs a subquery t1 which calculates the sum of the
+total_amt_usd for each sales representative and region. Then, it performs another subquery t2 which selects the maximum
+total_amt among all representatives in each region. Finally, it joins the subquery t2 with another subquery t3 which
+calculates the total_amt for each representative and region, and orders the results by total_amt in descending order.
+The final result is the intersection of t2 and t3 on the conditions t2.region_name = t3.region_name and
+t2.total_amt = t3.total_amt.
+*/
+
 
 -- For the region with the largest sales total_amt_usd, how many total orders were placed?
 -- STEP 1: Find the total_amt_usd totals associated with each sales rep, and I also wanted the region in which they
@@ -2075,6 +2094,25 @@ HAVING SUM(orders.total_amt_usd) = (SELECT MAX(total_amt) AS max_sales
                                                    JOIN region
                                                         ON sales_reps.region_id = region.id
                                           GROUP BY region) AS t1);
+/*
+Sure, this query is counting the number of orders per region and showing the region with the maximum sales.
+
+Joins the sales_reps, accounts, orders, and region tables using the relationship between sales_reps and accounts
+(sales_rep_id), between accounts and orders (account_id), and between sales_reps and region (region_id) respectively.
+
+Groups the result by region_name (which is the name of the region obtained from the region table).
+Calculates the number of orders (num_orders) for each region by counting the total column of the orders table.
+Filters the result by selecting only those regions that have the highest total amount of sales (total_amt_usd) by
+comparing the sum of total_amt_usd for each region with the maximum value obtained from a subquery.
+
+The subquery performs the following steps:
+a. Joins the sales_reps, accounts, orders, and region tables.
+b. Groups the result by region.
+c. Sums up the total_amt_usd for each region.
+d. Selects the maximum total_amt from the result of step c.
+Finally, the query returns the region_name and num_orders for each region that meets the criteria in the HAVING clause.
+*/
+
 
 -- How many accounts had more total purchases than the account name which has bought the most standard_qty paper
 -- throughout their lifetime as a customer?
@@ -2122,6 +2160,41 @@ FROM (SELECT accounts.name AS account_name
                                  GROUP BY account_name
                                  ORDER BY total_standard_qty DESC
                                  LIMIT 1) AS sub)) AS sub2;
+/*
+This SQL code returns the number of accounts whose total sum of orders is greater than the largest total sum of orders
+for any one account.
+
+Start with the innermost query:
+SELECT accounts.name AS account_name, SUM(standard_qty) AS total_standard_qty, SUM(total) AS total
+FROM accounts
+JOIN orders
+ON orders.account_id = accounts.id
+This query gets the total standard quantity and total amount for each account by joining the accounts and orders tables.
+Group by account_name and order the results by total_standard_qty in descending order.
+LIMIT 1 to get the account with the highest total_standard_qty value.
+
+The second query inside:
+SELECT total
+FROM (previous query result) AS sub
+This query gets the total value for the account with the highest total_standard_qty.
+
+The main query:
+SELECT COUNT(*) AS num_accounts
+FROM (SELECT accounts.name AS account_name
+FROM accounts
+JOIN orders
+ON orders.account_id = accounts.id
+GROUP BY account_name
+HAVING SUM(total) > (previous query result)) AS sub2
+The main query gets the number of accounts that have a total amount greater than the total amount of the account with
+the highest standard quantity.
+
+The query starts by joining the accounts and orders tables and grouping the results by account_name.
+Then it uses the HAVING clause to filter the results based on the total amount being greater than the result of the
+previous query.
+Finally, it counts the number of accounts that match the condition and gives the result the name num_accounts.
+*/
+
 
 -- For the customer that spent the most (in total over their lifetime as a customer) total_amt_usd, how many web_events
 -- did they have for each channel?
@@ -2149,6 +2222,22 @@ FROM web_events
                             LIMIT 1) AS sub)
 GROUP BY accounts.name, web_events.channel
 ORDER BY num_events DESC;
+/*
+This SQL code retrieves the name of the account with the highest total amount in sales, the channel of web events
+associated with that account, and the number of events for each channel.
+
+Here's what happens step by step:
+
+The innermost query (sub) retrieves the account with the highest total amount in sales by joining the accounts table
+with the orders table on the account_id column. The query groups the data by accounts.id and account_name, and orders
+the results by the total_amt column in descending order. It then limits the result to only the top 1 account.
+
+The next query (web_events) joins the web_events table with the result of the innermost query (sub) on the account_id
+column of the web_events table and the id column of the result of subquery.
+
+The final query groups the data by accounts.name and web_events.channel, and counts the number of events for each
+channel. The results are ordered by the num_events column in descending order.
+*/
 
 -- What is the lifetime average amount spent in terms of total_amt_usd for the top 10 total spending accounts?
 -- STEP 1: Find the top 10 total spending accounts.
@@ -2169,6 +2258,19 @@ FROM (SELECT accounts.name AS account_name, SUM(total_amt_usd) AS total_amt
       GROUP BY account_name
       ORDER BY total_amt DESC
       LIMIT 10) AS sub;
+/*
+This SQL query calculates the average value of total_amt from a subquery that returns the sum of total_amt_usd for the
+top 10 accounts (based on the sum of total_amt_usd for each account).
+
+Steps:
+
+The subquery (SELECT accounts.name AS account_name, SUM(total_amt_usd) AS total_amt ...) calculates the sum of
+total_amt_usd for each account.
+The subquery orders the results by total_amt in descending order and returns only the top 10 records.
+The outer query (SELECT AVG(total_amt) AS avg_total_amt ...) calculates the average of total_amt from the results of
+the subquery.
+*/
+
 
 -- What is the lifetime average amount spent in terms of total_amt_usd, including only the companies that spent more
 -- per order, on average, than the average of all orders
@@ -2191,6 +2293,23 @@ FROM (SELECT AVG(total_amt_usd) AS avg_total_amt
       GROUP BY account_id
       HAVING AVG(total_amt_usd) > (SELECT AVG(total_amt_usd) AS avg_total_amt
                                          FROM orders)) AS sub;
+/*
+This SQL statement calculates the average of the average order amounts for all accounts that have an average order
+amount greater than the overall average order amount for all accounts.
+
+The innermost query calculates the average order amount for each account by grouping the orders by account_id and using
+the AVG function on total_amt_usd.
+The result of the innermost query is then filtered using the HAVING clause, which only includes the accounts that have
+an average order amount greater than the overall average order amount, which is calculated by the second query.
+The second query calculates the average order amount for all accounts by using the AVG function on total_amt_usd in the
+orders table.
+The result of the second query is then used as the threshold in the HAVING clause of the innermost query.
+The outermost query calculates the average of the average order amounts returned by the second query by using the AVG
+function on avg_total_amt.
+The final result is the average of the average order amounts for all accounts that have an average order amount greater
+than the overall average order amount for all accounts.
+*/
+
 
 
 /*
@@ -2237,6 +2356,18 @@ SELECT t1.rep_name, t1.region_name, t1.total_amt
 FROM t1
     JOIN t2
         ON t1.region_name = t2.region_name AND t1.total_amt = t2.total_amt;
+/*
+The query first defines a Common Table Expression (CTE) named "t1" which calculates the total sales for each sales
+representative (rep_name) and region (region_name). The calculation is done by joining several tables: sales_reps,
+accounts, orders, and region. The result of the calculation is grouped by rep_name and region_name, and ordered by
+total sales amount (total_amt) in descending order.
+The query then defines another CTE named "t2" which calculates the maximum total sales for each region. This is done
+by grouping the results of "t1" by region_name and taking the maximum total sales (total_amt) for each region.
+Finally, the query selects the rep_name, region_name, and total_amt from "t1" where the region_name and total_amt match
+the region_name and total_amt in "t2". This results in the rep_name and region_name for each region with the maximum
+total sales.
+*/
+
 
 -- For the region with the largest sales total_amt_usd, how many total orders were placed?
 -- Using the WITH statement
@@ -2337,6 +2468,210 @@ WITH t1 AS (
                                                    FROM t1))
 SELECT AVG(avg_total_amt_usd) AS avg_total_amt
 FROM t2;
+
+/*
+DATA CLEANING
+In this lesson, you will be learning a number of techniques to
+
+Clean and re-structure messy data.
+Convert columns to different data types.
+Tricks for manipulating NULLs.
+
+This will give you a robust toolkit to get from raw data to clean data that's useful for analysis.
+*/
+
+-- Create a customer_data table
+CREATE TABLE customer_data (
+  id SERIAL PRIMARY KEY,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  phone_number VARCHAR(15),
+  location VARCHAR(50)
+);
+
+
+-- Insert data into customer_data.
+INSERT INTO customer_data (first_name, last_name,  phone_number, location)
+VALUES
+  ('John', 'Doe', '301-678-1234', 'Lansing, MI'),
+  ('Jane', 'Doe', '202-555-5432', 'New York, NY'),
+  ('Jim', 'Smith', '203-545-2345', 'Boston, MA'),
+  ('Emily', 'Johnson', '301-616-9045', 'Lansing, MI'),
+  ('David', 'Williams', '203-871-3012', 'Boston, MA'),
+  ('Michael', 'Brown', '301-678-2510', 'Philadelphia, PA'),
+  ('Sarah', 'Miller', '202-517-2310', 'New York, NY'),
+  ('William', 'Davis', '301-555-0123', 'Columbus, OH'),
+  ('Ashley', 'Garcia', '203-765-6540', 'Boston, MA'),
+  ('Sophia', 'Rodriguez', '202-816-6587', 'Raleigh, NC'),
+  ('Ethan', 'Martinez', '301-901-8708', 'Columbus, OH'),
+  ('Isabella', 'Anderson', '203-675-5609', 'San Jose, CA'),
+  ('Noah', 'Taylor', '301-402-8907', 'San Diego, CA'),
+  ('Mia', 'Thomas', '202-201-0987', 'New York, NY'),
+  ('Liam', 'Moore', '301-309-5623', 'Columbus, OH'),
+  ('Aria', 'Jackson', '203-313-2134', 'Boston, MA'),
+  ('Jacob', 'Martin', '202-212-2345', 'Houston, TX'),
+  ('Emily', 'Lee', '301-517-4532', 'Dallas, TX'),
+  ('Mason', 'Harris', '203-689-6574', 'Atlanta, GA'),
+  ('Madison', 'Clark', '202-678-4356', 'Miami, FL'),
+  ('Jayden', 'Lewis', '301-670-5410', 'Portland, OR'),
+  ('Charlotte', 'King', '203-909-6543', 'Boston, MA'),
+  ('Elijah', 'Walker', '301-764-8097', 'Columbus, OH'),
+  ('Ava', 'Wright', '202-313-9087', 'San Francisco, CA'),
+  ('William', 'Allen', '203-541-5423', 'Washington, DC');
+
+
+
+-- Show data in customer_data
+SELECT * FROM customer_data;
+/*
+LEFT
+LEFT pulls a specified number of characters for each row in a specified column starting at the beginning
+(or from the left). As you saw here, you can pull the first three digits of a phone number using LEFT(phone_number, 3).
+
+RIGHT pulls a specified number of characters for each row in a specified column starting at the end (or from the right).
+As you saw here, you can pull the last eight digits of a phone number using RIGHT(phone_number, 8).
+
+LENGTH provides the number of characters for each row of a specified column. Here, you saw that we could use this to
+get the length of each phone number as LENGTH(phone_number).
+*/
+
+-- SELECT all columns from customer_data, include a column called area_code that contains the first three digits of
+-- the phone number.
+SELECT *, LEFT(phone_number, 3) AS area_code FROM customer_data
+LIMIT 10;
+
+-- SELECT all columns from customer_data, include a column called phone_number_only that contains the last eight digits
+-- of the phone number.
+SELECT *, RIGHT(phone_number, 8) AS phone_number_only FROM customer_data
+LIMIT 10;
+
+-- SELECT all columns from customer_data, include a column called phone_number_length that contains the length of the
+-- phone number. area_code and phone_number_only from the previous exercises.
+SELECT *, LENGTH(phone_number) AS phone_number_length, LEFT(phone_number, 3) AS area_code,
+       RIGHT(phone_number, 8) AS phone_number_only
+FROM customer_data
+LIMIT 10;
+
+-- Pull the extension of the website from the url column in the accounts table.
+SELECT website, RIGHT(website, 3) AS extension
+FROM accounts;
+
+-- Using WITH, use the code from the previous exercise to create a table called t1 that contains the extension of the
+-- website from the url column in the accounts table and counts the number of times each extension appears.
+-- Then, use this table to find the most common extension.
+WITH t1 AS (
+    SELECT RIGHT(website, 3) AS extension, COUNT(*) AS num
+    FROM accounts
+    GROUP BY extension
+    ORDER BY num DESC)
+SELECT * FROM t1;
+
+-- Use the accounts table to pull the first letter of each company name to see the distribution of company names that
+-- begin with each letter (or number).
+SELECT LEFT(name, 1) AS first_letter, COUNT(*) AS num
+FROM accounts
+GROUP BY first_letter
+ORDER BY num DESC;
+
+-- Use the accounts table and a CASE statement to create two groups: one group of company names that start with a
+-- number and a second group of those company names that start with a letter
+SELECT name, CASE WHEN LEFT(name, 1) ~ '[0-9]' THEN 'starts with a number'
+                  ELSE 'starts with a letter'
+             END AS group_name
+FROM accounts;
+
+-- COUNT the number of companies in each group
+SELECT CASE WHEN LEFT(name, 1) ~ '[0-9]' THEN 'starts with a number'
+                  ELSE 'starts with a letter'
+             END AS group_name,
+       COUNT(*) AS num
+FROM accounts
+GROUP BY group_name;
+
+-- Consider vowels as a, e, i, o, and u. What proportion of company names start with a vowel, and what percent start
+-- with anything else
+SELECT CASE WHEN LEFT(name, 1) ~ '[aeiou]' OR LEFT(name, 1) ~ '[AEIOU]'
+    THEN 'starts with a vowel'
+                  ELSE 'starts with anything else'
+             END AS group_name,
+       COUNT(*) AS num
+FROM accounts
+GROUP BY group_name;
+
+/*
+LOWER
+LOWER converts all characters in a specified column to lowercase.
+
+UPPER
+UPPER converts all characters in a specified column to uppercase.
+*/
+-- Use the customer_data table to create a new column called first_name_lower that contains the lowercase version of
+-- the first_name column and first_name_upper that contains the uppercase version of the first_name column.
+SELECT first_name, LOWER(first_name) AS first_name_lower, UPPER(first_name) AS first_name_upper
+FROM customer_data
+LIMIT 10;
+
+
+/*
+POSITION takes a character and a column, and provides the index where that character is for each row. The index of the
+first position is 1 in SQL. If you come from another programming language, many begin indexing at 0. Here, you saw that
+you can pull the index of a comma as POSITION(',' IN city_state).
+
+STRPOS provides the same result as POSITION, but the syntax for achieving those results is a bit different as shown
+here: STRPOS(city_state, ',').
+
+Note, both POSITION and STRPOS are case sensitive, so looking for A is different than looking for a.
+
+Therefore, if you want to pull an index regardless of the case of a letter, you might want to use LOWER or UPPER to
+make all of the characters lower or uppercase.
+*/
+
+
+-- Use POSITION and STRPOS to find the index of the comma in the location column in the customer_data table.
+SELECT location, POSITION(',' IN location) AS position, STRPOS(location, ',') AS strpos
+FROM customer_data
+LIMIT 10;
+
+-- Use POSITION and STRPOS to find the index of the comma in the location column in the customer_data table, but
+-- regardless of the case of the letter.
+SELECT location, POSITION(',' IN LOWER(location)) AS position, STRPOS(LOWER(location), ',') AS strpos
+FROM customer_data
+LIMIT 10;
+
+-- Use the customer_data table to create a new column called city that contains the city name from the location column.
+SELECT location, LEFT(location, POSITION(',' IN LOWER(location)) - 1) AS city
+FROM customer_data
+LIMIT 10;
+
+-- Use the accounts table to create first and last name columns that hold the first and last names for the primary_poc.
+SELECT primary_poc, LEFT(primary_poc, POSITION(' ' IN primary_poc) - 1) AS first_name,
+       RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)) AS last_name
+FROM accounts
+LIMIT 10;
+
+-- Now see if you can do the same thing for every rep name in the sales_reps table. Again provide first and last
+-- name columns.
+SELECT name, LEFT(name, POSITION(' ' IN name) - 1) AS first_name,
+       RIGHT(name, LENGTH(name) - POSITION(' ' IN name)) AS last_name
+FROM sales_reps
+LIMIT 10;
+
+
+/*
+REPLACE takes a column, a character to replace, and a character to replace it with. Here, you saw that you could
+replace all instances of a comma with a space as REPLACE(city_state, ',', ' ').
+*/
+-- Use REPLACE to replace all instances of a comma with a space in the location column in the customer_data table.
+SELECT location, REPLACE(location, ',', ' ') AS location_replaced
+FROM customer_data
+LIMIT 10;
+
+
+
+
+
+
+
 
 
 
