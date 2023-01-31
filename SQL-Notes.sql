@@ -1973,6 +1973,8 @@ The Subquery is finding the month of the first order, and the outer query is usi
 orders that occurred in that month.
 */
 
+-- SCREEN SHOT START HERE AGAIN
+
 -- Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
 -- STEP 1: Find the total_amt_usd totals associated with each sales rep, and I also wanted the region in which they
 -- were located
@@ -2189,6 +2191,153 @@ FROM (SELECT AVG(total_amt_usd) AS avg_total_amt
       GROUP BY account_id
       HAVING AVG(total_amt_usd) > (SELECT AVG(total_amt_usd) AS avg_total_amt
                                          FROM orders)) AS sub;
+
+
+/*
+The WITH statement is often called a Common Table Expression or CTE. Though these expressions serve the exact same
+purpose as subqueries, they are more common in practice, as they tend to be cleaner for a future reader to follow the
+logic.
+
+In the next concept, we will walk through this example a bit more slowly to make sure you have all the similarities
+between subqueries and these expressions down for you to use in practice!
+*/
+
+-- You need to find the average number of events for each channel per day.
+-- STEP 1: Find the number of events for each channel per day.
+WITH events_per_day AS (
+    SELECT DATE_TRUNC('day',occurred_at) AS day,
+       channel, COUNT(*) as events
+FROM web_events
+GROUP BY day, channel
+)
+SELECT channel, AVG(events) AS avg_events
+FROM events_per_day
+GROUP BY channel
+ORDER BY avg_events DESC;
+
+
+-- Using the WITH statement
+-- Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
+WITH t1 AS (SELECT sales_reps.name AS rep_name,
+                   region.name AS region_name,
+                   SUM(total_amt_usd) AS total_amt
+            FROM sales_reps
+                JOIN accounts
+                    ON accounts.sales_rep_id = sales_reps.id
+                JOIN orders
+                    ON orders.account_id = accounts.id
+                JOIN region
+                    ON sales_reps.region_id = region.id
+            GROUP BY rep_name, region_name
+            ORDER BY total_amt DESC),
+    t2 AS (SELECT region_name, MAX(total_amt) AS total_amt
+           FROM t1
+   GROUP BY 1)
+SELECT t1.rep_name, t1.region_name, t1.total_amt
+FROM t1
+    JOIN t2
+        ON t1.region_name = t2.region_name AND t1.total_amt = t2.total_amt;
+
+-- For the region with the largest sales total_amt_usd, how many total orders were placed?
+-- Using the WITH statement
+WITH t1 AS (SELECT region.name AS region_name,
+                   SUM(total_amt_usd) AS total_amt
+            FROM sales_reps
+                JOIN accounts
+                    ON accounts.sales_rep_id = sales_reps.id
+                JOIN orders
+                    ON orders.account_id = accounts.id
+                JOIN region
+                    ON sales_reps.region_id = region.id
+            GROUP BY region_name),
+    t2 AS (SELECT MAX(total_amt) AS total_amt
+           FROM t1)
+SELECT region.name, COUNT(orders.total) AS num_orders
+FROM sales_reps
+    JOIN accounts
+        ON accounts.sales_rep_id = sales_reps.id
+    JOIN orders
+        ON orders.account_id = accounts.id
+    JOIN region
+        ON sales_reps.region_id = region.id
+GROUP BY region.name
+HAVING SUM(orders.total_amt_usd) = (SELECT *
+                    FROM t2);
+
+-- For the account that purchased the most (in total over their lifetime as a customer) standard_qty paper, how many
+-- accounts still had more in total purchases?
+-- Using the WITH statement
+WITH t1 AS (
+    SELECT accounts.name AS account_name,
+           SUM(orders.standard_qty) AS total_standard_qty,
+           SUM(orders.total) AS total
+    FROM accounts
+        JOIN orders
+            ON orders.account_id = accounts.id
+    GROUP BY account_name
+    ORDER BY total_standard_qty DESC
+    LIMIT 1),
+    t2 AS (
+        SELECT accounts.name AS account_name
+        FROM accounts
+            JOIN orders
+                ON orders.account_id = accounts.id
+        GROUP BY account_name
+        HAVING SUM(orders.total) > (SELECT total
+                                           FROM t1))
+SELECT COUNT(*) AS num_accounts
+FROM t2;
+
+-- For the customer that spent the most (in total over their lifetime as a customer) total_amt_usd, how many web_events
+-- did they have for each channel?
+-- Using the WITH statement
+WITH t1 AS (
+    SELECT accounts.name AS account_name, accounts.id,
+           SUM(orders.total_amt_usd) AS total_amt
+    FROM accounts
+        JOIN orders
+            ON orders.account_id = accounts.id
+    GROUP BY accounts.id, account_name
+    ORDER BY total_amt DESC
+    LIMIT 1)
+SELECT accounts.name AS account_name, web_events.channel, COUNT(*) AS num_events
+FROM accounts
+    JOIN web_events
+        ON web_events.account_id = accounts.id AND accounts.id = (SELECT id FROM t1)
+GROUP BY account_name, channel
+ORDER BY num_events DESC;
+
+-- What is the lifetime average amount spent in terms of total_amt_usd for the top 10 total spending accounts?
+-- Using the WITH statement
+WITH t1 AS (
+    SELECT accounts.name AS account_name, accounts.id,
+           SUM(orders.total_amt_usd) AS total_amt
+    FROM accounts
+        JOIN orders
+            ON orders.account_id = accounts.id
+    GROUP BY accounts.id, account_name
+    ORDER BY total_amt DESC
+    LIMIT 10)
+SELECT AVG(total_amt) AS avg_total_amt
+FROM t1;
+
+-- What is the lifetime average amount spent in terms of total_amt_usd, including only the companies that spent more
+-- per order, on average, than the average of all orders.
+-- Using the WITH statement
+WITH t1 AS (
+    SELECT AVG(orders.total_amt_usd) AS avg_total_amt
+    FROM orders
+    JOIN accounts ON accounts.id = orders.account_id),
+    t2 AS (
+        SELECT accounts.id, AVG(orders.total_amt_usd) AS avg_total_amt_usd
+        FROM accounts
+            JOIN orders ON orders.account_id = accounts.id
+        GROUP BY accounts.id
+        HAVING AVG(orders.total_amt_usd) > (SELECT avg_total_amt
+                                                   FROM t1))
+SELECT AVG(avg_total_amt_usd) AS avg_total_amt
+FROM t2;
+
 
 
 
