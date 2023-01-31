@@ -1298,11 +1298,13 @@ ORDER BY web_events.channel, accounts.name;
  QUIZ
  */
 
- -- For each account, determine the average amount of each type of paper they purchased across their orders. Your
- -- result should have four columns - one for the account name and one for the average quantity purchased for each
- -- of the paper types for each account.
-SELECT accounts.name, AVG(orders.standard_qty) as avg_standard_qty, AVG(orders.gloss_qty) as avg_gloss_qty,
-       AVG(orders.poster_qty) as avg_poster_qty
+-- For each account, determine the average amount of each type of paper they purchased across their orders. Your
+-- result should have four columns - one for the account name and one for the average quantity purchased for each
+-- of the paper types for each account.
+SELECT accounts.name,
+       AVG(orders.standard_qty) as avg_standard_qty,
+       AVG(orders.gloss_qty)    as avg_gloss_qty,
+       AVG(orders.poster_qty)   as avg_poster_qty
 FROM accounts
          JOIN orders
               ON accounts.id = orders.account_id
@@ -1311,9 +1313,10 @@ GROUP BY accounts.name;
 
 -- For each account, determine the average amount spent per order on each paper type. Your result should have four
 -- columns - one for the account name and one for the average amount spent on each paper type.
-SELECT accounts.name, AVG(orders.standard_amt_usd) as avg_standard_amt_usd,
-       AVG(orders.gloss_amt_usd) as avg_gloss_amt_usd,
-       AVG(orders.poster_amt_usd) as avg_poster_amt_usd
+SELECT accounts.name,
+       AVG(orders.standard_amt_usd) as avg_standard_amt_usd,
+       AVG(orders.gloss_amt_usd)    as avg_gloss_amt_usd,
+       AVG(orders.poster_amt_usd)   as avg_poster_amt_usd
 FROM accounts
          JOIN orders
               ON accounts.id = orders.account_id
@@ -1341,9 +1344,9 @@ FROM accounts
          JOIN web_events
               ON accounts.id = web_events.account_id
          JOIN sales_reps
-                ON accounts.sales_rep_id = sales_reps.id
-            JOIN region
-                ON sales_reps.region_id = region.id
+              ON accounts.sales_rep_id = sales_reps.id
+         JOIN region
+              ON sales_reps.region_id = region.id
 GROUP BY region.name, web_events.channel
 ORDER BY total_web_events DESC;
 
@@ -1402,7 +1405,7 @@ associated with more than one region, the first query should have returned more 
 
 
 -- Have any sales reps worked on more than one account?
-SELECT sales_reps.id, sales_reps.name, COUNT( accounts.id) as num_accounts
+SELECT sales_reps.id, sales_reps.name, COUNT(accounts.id) as num_accounts
 FROM sales_reps
          JOIN accounts
               ON sales_reps.id = accounts.sales_rep_id
@@ -1525,7 +1528,8 @@ FROM accounts
          JOIN web_events
               ON accounts.id = web_events.account_id
 GROUP BY accounts.id, accounts.name, web_events.channel
-HAVING web_events.channel = 'facebook' AND COUNT(web_events.id) > 6
+HAVING web_events.channel = 'facebook'
+   AND COUNT(web_events.id) > 6
 ORDER BY num_facebook_events DESC;
 
 
@@ -1595,10 +1599,12 @@ increasing year over year, with 2016 being the largest sales to date. At this ra
 largest sales.
 */
 -- SELECT only the year and total sales for only 2013 and 2017 dont use between
-SELECT EXTRACT(year FROM occurred_at) as year,EXTRACT(month FROM occurred_at) as month, SUM(total_amt_usd) as total_sales
+SELECT EXTRACT(year FROM occurred_at)  as year,
+       EXTRACT(month FROM occurred_at) as month,
+       SUM(total_amt_usd)              as total_sales
 FROM orders
 WHERE EXTRACT(year FROM occurred_at) IN (2013, 2017)
-GROUP BY year,month;
+GROUP BY year, month;
 
 -- Which month did Parch & Posey have the greatest sales in terms of total dollars? Are all months evenly represented
 -- by the dataset?
@@ -1659,8 +1665,9 @@ ORDER BY num_orders DESC;
 */
 
 -- In which month of which year did Walmart spend the most on gloss paper in terms of dollars?
-SELECT EXTRACT(year FROM occurred_at) as year, EXTRACT(month FROM occurred_at) as month,
-       SUM(total_amt_usd) as total_sales
+SELECT EXTRACT(year FROM occurred_at)  as year,
+       EXTRACT(month FROM occurred_at) as month,
+       SUM(total_amt_usd)              as total_sales
 FROM orders
          JOIN accounts
               ON orders.account_id = accounts.id
@@ -1698,28 +1705,33 @@ You will learn how to get a solution without an error to this query when you lea
 section.
 */
 -- USE CASE STATEMENT TO FIX DIVISION BY ZERO ERROR
-SELECT account_id, CASE WHEN standard_qty = 0 OR standard_qty IS NULL THEN 0
-                        ELSE standard_amt_usd / standard_qty
-                   END AS unit_price
+SELECT account_id,
+       CASE
+           WHEN standard_qty = 0 OR standard_qty IS NULL THEN 0
+           ELSE standard_amt_usd / standard_qty
+           END AS unit_price
 FROM orders
 LIMIT 10;
 
 
 -- Write a query to display for each order, the account ID, total amount of the order, and the level of the order -
 -- ‘Large’ or ’Small’ - depending on if the order is $3000 or more, or smaller than $3000.
-SELECT account_id, total_amt_usd,
-       CASE WHEN total_amt_usd >= 3000 THEN 'Large'
-            ELSE 'Small'
-       END AS order_level
+SELECT account_id,
+       total_amt_usd,
+       CASE
+           WHEN total_amt_usd >= 3000 THEN 'Large'
+           ELSE 'Small'
+           END AS order_level
 FROM orders
 LIMIT 20;
 
 -- Write a query to display the number of orders in each of three categories, based on the total number of items in
 -- each order. The three categories are: 'At Least 2000', 'Between 1000 and 2000' and 'Less than 1000'.
-SELECT CASE WHEN total >= 2000 THEN 'At Least 2000'
-            WHEN total >= 1000 THEN 'Between 1000 and 2000'
-            ELSE 'Less than 1000'
-       END AS order_level,
+SELECT CASE
+           WHEN total >= 2000 THEN 'At Least 2000'
+           WHEN total >= 1000 THEN 'Between 1000 and 2000'
+           ELSE 'Less than 1000'
+           END   AS order_level,
        COUNT(id) AS num_orders
 FROM orders
 GROUP BY order_level;
@@ -1744,11 +1756,13 @@ order_level.
 -- The second branch is between 200,000 and 100,000 usd. The lowest branch is anyone under 100,000 usd. Provide a
 -- table that includes the level associated with each account. You should provide the account name, the total sales
 -- of all orders for the customer, and the level. Order with the top spending customers listed first.
-SELECT accounts.name, SUM(total_amt_usd) AS total_sales,
-       CASE WHEN SUM(total_amt_usd) > 200000 THEN 'Top'
-            WHEN SUM(total_amt_usd) > 100000 THEN 'Middle'
-            ELSE 'Low'
-       END AS level
+SELECT accounts.name,
+       SUM(total_amt_usd) AS total_sales,
+       CASE
+           WHEN SUM(total_amt_usd) > 200000 THEN 'Top'
+           WHEN SUM(total_amt_usd) > 100000 THEN 'Middle'
+           ELSE 'Low'
+           END            AS level
 FROM orders
          JOIN accounts
               ON orders.account_id = accounts.id
@@ -1758,11 +1772,13 @@ ORDER BY total_sales DESC;
 -- We would now like to perform a similar calculation to the first, but we want to obtain the total amount spent by
 -- customers only in 2016 and 2017. Keep the same levels as in the previous question. Order with the top spending
 -- customers listed first.
-SELECT accounts.name, SUM(total_amt_usd) AS total_sales,
-       CASE WHEN SUM(total_amt_usd) > 200000 THEN 'Top'
-            WHEN SUM(total_amt_usd) > 100000 THEN 'Middle'
-            ELSE 'Low'
-       END AS level
+SELECT accounts.name,
+       SUM(total_amt_usd) AS total_sales,
+       CASE
+           WHEN SUM(total_amt_usd) > 200000 THEN 'Top'
+           WHEN SUM(total_amt_usd) > 100000 THEN 'Middle'
+           ELSE 'Low'
+           END            AS level
 FROM orders
          JOIN accounts
               ON orders.account_id = accounts.id
@@ -1773,14 +1789,16 @@ ORDER BY total_sales DESC;
 -- We would like to identify top performing sales reps, which are sales reps associated with more than 200 orders.
 -- Create a table with the sales rep name, the total number of orders, and a column with top or not depending on if
 -- they have more than 200 orders. Place the top sales people first in your final table.
-SELECT sales_reps.name, COUNT(orders.id) AS num_orders,
-       CASE WHEN COUNT(orders.id) > 200 THEN 'Top'
-            ELSE 'Not Top'
-       END AS top
+SELECT sales_reps.name,
+       COUNT(orders.id) AS num_orders,
+       CASE
+           WHEN COUNT(orders.id) > 200 THEN 'Top'
+           ELSE 'Not Top'
+           END          AS top
 FROM orders
          JOIN accounts
               ON orders.account_id = accounts.id
-            JOIN sales_reps
+         JOIN sales_reps
               ON accounts.sales_rep_id = sales_reps.id
 GROUP BY sales_reps.name
 ORDER BY num_orders DESC;
@@ -1792,15 +1810,18 @@ ORDER BY num_orders DESC;
 -- total sales across all orders, and a column with top, middle, or low depending on this criteria. Place the top sales
 -- people based on dollar amount of sales first in your final table. You might see a few upset sales people by this
 -- criteria!
-SELECT sales_reps.name, COUNT(orders.id) AS num_orders, SUM(total_amt_usd) AS total_sales,
-       CASE WHEN COUNT(orders.id) > 200 OR SUM(total_amt_usd) > 750000 THEN 'Top'
-            WHEN COUNT(orders.id) > 150 OR SUM(total_amt_usd) > 500000 THEN 'Middle'
-            ELSE 'Low'
-       END AS level
+SELECT sales_reps.name,
+       COUNT(orders.id)   AS num_orders,
+       SUM(total_amt_usd) AS total_sales,
+       CASE
+           WHEN COUNT(orders.id) > 200 OR SUM(total_amt_usd) > 750000 THEN 'Top'
+           WHEN COUNT(orders.id) > 150 OR SUM(total_amt_usd) > 500000 THEN 'Middle'
+           ELSE 'Low'
+           END            AS level
 FROM orders
          JOIN accounts
               ON orders.account_id = accounts.id
-            JOIN sales_reps
+         JOIN sales_reps
               ON accounts.sales_rep_id = sales_reps.id
 GROUP BY sales_reps.name
 ORDER BY total_sales DESC;
@@ -1809,16 +1830,18 @@ ORDER BY total_sales DESC;
 /*
 SQL SUBQUERIES AND TEMPORARY TABLES
 A subquery is a query that is nested inside another query, and it is used to retrieve data that will
-be used by the outer query. A subquery can be used in different clauses of an SQL statement, such as the SELECT, FROM, WHERE, and HAVING clauses.
+be used by the outer query. A subquery can be used in different clauses of an SQL statement, such as the SELECT, FROM,
+WHERE, and HAVING clauses.
 
 For example, the following SQL statement uses a subquery in the WHERE clause to retrieve all the
 orders from customers who have placed orders with a total amount greater than 2000:
 */
 SELECT *
 FROM orders
-WHERE id IN (SELECT id FROM orders
-                     GROUP BY id
-                     HAVING SUM(total) > 2000);
+WHERE id IN (SELECT id
+             FROM orders
+             GROUP BY id
+             HAVING SUM(total) > 2000);
 
 /*
 A temporary table, also known as a derived table or a subtable, is a table that exists only for the duration of a
@@ -1845,17 +1868,15 @@ LIMIT 10;
 DROP TABLE temp_table;
 
 -- Create a temporary table that an account's name and the total amount of all orders for that account. Use WITH clause.
-WITH temp_table AS (
-    SELECT accounts.name, SUM(total_amt_usd) AS total_sales
-    FROM orders
-             JOIN accounts
-                  ON orders.account_id = accounts.id
-    GROUP BY accounts.name
-)
+WITH temp_table AS (SELECT accounts.name, SUM(total_amt_usd) AS total_sales
+                    FROM orders
+                             JOIN accounts
+                                  ON orders.account_id = accounts.id
+                    GROUP BY accounts.name)
 SELECT *
 FROM temp_table
 ORDER BY total_sales DESC
-LIMIT 10;
+LIMIT 15;
 
 /*
 This code is using a SQL query that utilizes a subquery with a Common Table Expression (CTE) to create a temporary
@@ -1883,14 +1904,14 @@ that we will need to use some sort of subquery.
 
 -- Find the number of events that occur for each day for each channel.
 -- Use DATE_TRUNC to extract the day from occurred_at and group by the day and channel.
-SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+SELECT DATE_TRUNC('day', occurred_at) AS day, channel, COUNT(id) AS num_events
 FROM web_events
 GROUP BY day, channel
 ORDER BY num_events DESC;
 
 -- Now create a subquery that simply provides all of the data from your first query.
 SELECT *
-FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+FROM (SELECT DATE_TRUNC('day', occurred_at) AS day, channel, COUNT(id) AS num_events
       FROM web_events
       GROUP BY day, channel
       ORDER BY num_events DESC) AS subquery;
@@ -1898,7 +1919,7 @@ FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_eve
 -- Now find the average number of events for each channel. Since you broke out by day earlier, this is giving you an
 -- average per day.
 SELECT channel, AVG(num_events) AS avg_events
-FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(id) AS num_events
+FROM (SELECT DATE_TRUNC('day', occurred_at) AS day, channel, COUNT(id) AS num_events
       FROM web_events
       GROUP BY day, channel
       ORDER BY num_events DESC) AS subquery
@@ -1917,9 +1938,257 @@ The outer query then uses this result to select the name and order_date from the
 is the result of the subquery.
 */
 
+-- Find the orders which occurred earliest in the order table. Use the MIN function to find the earliest order date.
+-- Use DATE_TRUNC to extract the month from occurred_at.
+SELECT DATE_TRUNC('month', MIN(occurred_at)) AS month, COUNT(id) AS num_orders
+FROM orders;
 
+-- Now add a subquery to the query above to find orders that occurred at the same month as the earliest order.
+SELECT *
+FROM orders
+WHERE DATE_TRUNC('month', occurred_at) = (SELECT DATE_TRUNC('month', MIN(occurred_at)) AS month
+                                          FROM orders)
+ORDER BY occurred_at;
 
+-- Use DATE_TRUNC to pull month level information about the first order ever placed in the orders table.
+-- Use the MIN function to find the earliest order date.
+SELECT DATE_TRUNC('month', MIN(occurred_at)) AS month, COUNT(id) AS num_orders
+FROM orders;
+/*
+The result of this query is the month of the first order, and the number of orders that occurred in that month.
+*/
+-- Use the result of the previous query to find only the orders that took place in the same month and year as the first
+-- order, and then pull the average for each type of paper qty in this month.
+SELECT AVG(standard_qty)  AS avg_standard_qty,
+       AVG(gloss_qty)     AS avg_gloss_qty,
+       AVG(poster_qty)    AS avg_poster_qty,
+       SUM(total_amt_usd) AS total_sales
+FROM orders
+WHERE DATE_TRUNC('month', occurred_at) = (SELECT DATE_TRUNC('month', MIN(occurred_at)) AS month
+                                          FROM orders)
+GROUP BY DATE_TRUNC('month', occurred_at)
+ORDER BY DATE_TRUNC('month', occurred_at);
+/*
+The Subquery is finding the month of the first order, and the outer query is using this result to find the number of
+orders that occurred in that month.
+*/
 
+-- Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
+-- STEP 1: Find the total_amt_usd totals associated with each sales rep, and I also wanted the region in which they
+-- were located
+SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_usd) AS total_sales
+FROM sales_reps
+         JOIN accounts
+              ON accounts.sales_rep_id = sales_reps.id
+         JOIN orders
+              ON orders.account_id = accounts.id
+         JOIN region
+              ON sales_reps.region_id = region.id
+GROUP BY sales_rep, region
+ORDER BY total_sales DESC;
+
+-- STEP 2: Find the largest total_amt_usd sales for each region.
+SELECT region, MAX(total_sales) AS max_sales
+FROM (SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_usd) AS total_sales
+      FROM sales_reps
+               JOIN accounts
+                    ON accounts.sales_rep_id = sales_reps.id
+               JOIN orders
+                    ON orders.account_id = accounts.id
+               JOIN region
+                    ON sales_reps.region_id = region.id
+      GROUP BY sales_rep, region
+      ORDER BY total_sales DESC) AS t1
+GROUP BY region
+ORDER BY max_sales DESC;
+
+-- STEP 3: Find the sales_rep in each region with the largest amount of total_amt_usd sales.
+-- Use RANK() OVER to rank the total_amt_usd sales for each region, and then use the rank to find the sales_rep
+-- with the largest total_amt_usd sales for each region.
+SELECT t3.rep_name, t3.region_name, t3.total_sales
+FROM (SELECT t2.region_name,
+             t2.rep_name,
+             t2.total_sales,
+             RANK() OVER (PARTITION BY t2.region_name
+                 ORDER BY t2.total_sales DESC) AS rank
+      FROM (SELECT t1.region_name, t1.rep_name, t1.total_sales
+            FROM (SELECT sales_reps.name AS rep_name, region.name AS region_name, SUM(total_amt_usd) AS total_sales
+                  FROM sales_reps
+                           JOIN accounts
+                                ON accounts.sales_rep_id = sales_reps.id
+                           JOIN orders
+                                ON orders.account_id = accounts.id
+                           JOIN region
+                                ON sales_reps.region_id = region.id
+                  GROUP BY rep_name, region_name
+                  ORDER BY total_sales DESC) AS t1) AS t2) AS t3
+WHERE t3.rank = 1;
+
+-- For the region with the largest sales total_amt_usd, how many total orders were placed?
+-- STEP 1: Find the total_amt_usd totals associated with each sales rep, and I also wanted the region in which they
+-- were located
+SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_usd) AS total_amt
+FROM sales_reps
+         JOIN accounts
+              ON accounts.sales_rep_id = sales_reps.id
+         JOIN orders
+              ON orders.account_id = accounts.id
+         JOIN region
+              ON sales_reps.region_id = region.id
+GROUP BY sales_rep, region
+ORDER BY total_amt DESC;
+
+-- STEP 2: Find the largest total_amt_usd sales for each region from the previous query.
+SELECT region, MAX(total_amt) AS max_sales
+FROM (SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_usd) AS total_amt
+      FROM sales_reps
+               JOIN accounts
+                    ON accounts.sales_rep_id = sales_reps.id
+               JOIN orders
+                    ON orders.account_id = accounts.id
+               JOIN region
+                    ON sales_reps.region_id = region.id
+      GROUP BY sales_rep, region
+      ORDER BY total_amt DESC) AS t1
+GROUP BY region
+ORDER BY max_sales DESC;
+
+-- STEP 3: Pull the total number of orders for the region with the largest total_amt_usd sales.
+SELECT region.name as region_name, COUNT(orders.total) AS num_orders
+FROM sales_reps
+         JOIN accounts
+              ON accounts.sales_rep_id = sales_reps.id
+         JOIN orders
+              ON orders.account_id = accounts.id
+         JOIN region
+              ON sales_reps.region_id = region.id
+GROUP BY region_name
+HAVING SUM(orders.total_amt_usd) = (SELECT MAX(total_amt) AS max_sales
+                                    FROM (SELECT region.name AS region, SUM(total_amt_usd) AS total_amt
+                                          FROM sales_reps
+                                                   JOIN accounts
+                                                        ON accounts.sales_rep_id = sales_reps.id
+                                                   JOIN orders
+                                                        ON orders.account_id = accounts.id
+                                                   JOIN region
+                                                        ON sales_reps.region_id = region.id
+                                          GROUP BY region) AS t1);
+
+-- How many accounts had more total purchases than the account name which has bought the most standard_qty paper
+-- throughout their lifetime as a customer?
+-- STEP 1: Find the account that had the most standard_qty paper purchased.
+SELECT accounts.name AS account_name, SUM(standard_qty) AS total_standard_qty, SUM(total) AS total
+FROM accounts
+         JOIN orders
+              ON orders.account_id = accounts.id
+GROUP BY account_name
+ORDER BY total_standard_qty DESC
+LIMIT 1;
+
+-- STEP 2: Find all the accounts with more total sales than the account with the most standard_qty paper purchased.
+-- Use the subquery from STEP 1
+-- Use HAVING to filter out the account with the most standard_qty paper purchased.
+SELECT accounts.name AS account_name
+FROM accounts
+         JOIN orders
+              ON orders.account_id = accounts.id
+GROUP BY account_name
+HAVING SUM(total) > (SELECT total
+                     FROM (SELECT accounts.name AS account_name, SUM(standard_qty) AS total_standard_qty,
+                                  SUM(total) AS total
+                           FROM accounts
+                                    JOIN orders
+                                         ON orders.account_id = accounts.id
+                           GROUP BY account_name
+                           ORDER BY total_standard_qty DESC
+                           LIMIT 1) AS sub);
+
+-- STEP 3: We can get the count of the accounts with more total sales than the account with the most standard_qty
+-- paper purchased by using COUNT() on the subquery from STEP 2.
+SELECT COUNT(*) AS num_accounts
+FROM (SELECT accounts.name AS account_name
+      FROM accounts
+               JOIN orders
+                    ON orders.account_id = accounts.id
+      GROUP BY account_name
+      HAVING SUM(total) > (SELECT total
+                           FROM (SELECT accounts.name AS account_name, SUM(standard_qty) AS total_standard_qty,
+                                        SUM(total) AS total
+                                 FROM accounts
+                                          JOIN orders
+                                               ON orders.account_id = accounts.id
+                                 GROUP BY account_name
+                                 ORDER BY total_standard_qty DESC
+                                 LIMIT 1) AS sub)) AS sub2;
+
+-- For the customer that spent the most (in total over their lifetime as a customer) total_amt_usd, how many web_events
+-- did they have for each channel?
+-- STEP 1: Find the customer that spent the most total_amt_usd.
+SELECT accounts.id, accounts.name AS account_name, SUM(total_amt_usd) AS total_amt
+FROM accounts
+         JOIN orders
+              ON orders.account_id = accounts.id
+GROUP BY accounts.id, account_name
+ORDER BY total_amt DESC
+LIMIT 1;
+
+-- STEP 2: Find the number of events on each channel this company had.
+SELECT accounts.name, web_events.channel, COUNT(web_events.channel) AS num_events
+FROM web_events
+         JOIN accounts
+              ON web_events.account_id = accounts.id AND accounts.id =
+                     (SELECT id
+                      FROM (SELECT accounts.id, accounts.name AS account_name, SUM(total_amt_usd) AS total_amt
+                            FROM accounts
+                                     JOIN orders
+                                          ON orders.account_id = accounts.id
+                            GROUP BY accounts.id, account_name
+                            ORDER BY total_amt DESC
+                            LIMIT 1) AS sub)
+GROUP BY accounts.name, web_events.channel
+ORDER BY num_events DESC;
+
+-- What is the lifetime average amount spent in terms of total_amt_usd for the top 10 total spending accounts?
+-- STEP 1: Find the top 10 total spending accounts.
+SELECT accounts.name AS account_name, SUM(total_amt_usd) AS total_amt
+FROM accounts
+         JOIN orders
+              ON orders.account_id = accounts.id
+GROUP BY account_name
+ORDER BY total_amt DESC
+LIMIT 10;
+
+-- STEP 2: Find the average amount spent for the top 10 total spending accounts.
+SELECT AVG(total_amt) AS avg_total_amt
+FROM (SELECT accounts.name AS account_name, SUM(total_amt_usd) AS total_amt
+      FROM accounts
+               JOIN orders
+                    ON orders.account_id = accounts.id
+      GROUP BY account_name
+      ORDER BY total_amt DESC
+      LIMIT 10) AS sub;
+
+-- What is the lifetime average amount spent in terms of total_amt_usd, including only the companies that spent more
+-- per order, on average, than the average of all orders
+-- STEP 1: Find the average amount spent per order.
+SELECT AVG(total_amt_usd) AS avg_total_amt
+FROM orders;
+
+-- STEP 2: Find the average amount spent per order for companies that spent more per order than the average
+-- of all orders.
+SELECT orders.account_id, AVG(orders.total_amt_usd) AS avg_total_amt
+FROM orders
+GROUP BY orders.account_id
+HAVING AVG(orders.total_amt_usd) > (SELECT AVG(orders.total_amt_usd) AS avg_total_amt
+                       FROM orders);
+
+--STEP 3: Get the average of these values.
+SELECT AVG(avg_total_amt) AS avg_total_amt
+FROM (SELECT AVG(total_amt_usd) AS avg_total_amt
+      FROM orders
+      GROUP BY account_id
+      HAVING AVG(total_amt_usd) > (SELECT AVG(total_amt_usd) AS avg_total_amt
+                                         FROM orders)) AS sub;
 
 
 
