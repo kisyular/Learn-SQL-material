@@ -1746,7 +1746,7 @@ value is less than 1000.
 COUNT() function to count the number of orders for each order_level and the GROUP BY clause to group the result by
 order_level, so that the query returns the number of orders for each order_level.
 
-This query will return a resultset with 2 columns: order_level and num_orders, where order_level can be
+This query will return a result set with 2 columns: order_level and num_orders, where order_level can be
 'At Least 2000', 'Between 1000 and 2000', 'Less than 1000' and num_orders will be the count of orders for each
 order_level.
 */
@@ -1973,7 +1973,7 @@ The Subquery is finding the month of the first order, and the outer query is usi
 orders that occurred in that month.
 */
 
--- SCREEN SHOT START HERE AGAIN
+
 
 -- Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
 -- STEP 1: Find the total_amt_usd totals associated with each sales rep, and I also wanted the region in which they
@@ -2003,6 +2003,34 @@ FROM (SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_
       ORDER BY total_sales DESC) AS t1
 GROUP BY region
 ORDER BY max_sales DESC;
+/*
+This is a SQL code that uses multiple joins to join the sales_reps, accounts, orders and region tables. Then, it
+calculates the total sales for each sales rep and region by summing the total amount in USD in the orders table. The
+sales_rep, region and total_sales information is then grouped by sales_rep and region. The result is sorted in
+descending order of total_sales.
+
+Finally, the code calculates the maximum total sales for each region by using the MAX function and grouping the result
+by region. The result is sorted again in descending order of max_sales. The result of the query will show the maximum
+total sales for each region.
+*/
+
+/*
+STEPS
+- The SELECT statement starts with the region and a column called max_sales, which is calculated using the MAX function.
+- The data for the max_sales column is sourced from the subquery in the parentheses.
+- The subquery starts with a SELECT statement that selects three columns: sales_rep, region, and total_sales.
+- The sales_rep column is obtained from the sales_reps table, the region column from the region table and the
+total_sales column is calculated as the sum of the total_amt_usd column from the orders table.
+- The data for the subquery is obtained by joining the sales_reps, accounts, orders, and region tables.
+- The joining conditions ensure that each row from the orders table corresponds to a row in the accounts table and each
+row from the accounts table corresponds to a row in the sales_reps table.
+- The subquery groups the data by the sales_rep and region columns, and orders the result set by the total_sales column
+in descending order.
+- The subquery result set is aliased as t1.
+- The main query groups the data by the region column and calculates the max_sales value for each region.
+- Finally, the result set is ordered by the max_sales column in descending order.
+
+*/
 
 -- STEP 3: Find the sales_rep in each region with the largest amount of total_amt_usd sales.
 -- Use RANK() OVER to rank the total_amt_usd sales for each region, and then use the rank to find the sales_rep
@@ -2059,6 +2087,7 @@ FROM sales_reps
 GROUP BY sales_rep, region
 ORDER BY total_amt DESC;
 
+
 -- STEP 2: Find the largest total_amt_usd sales for each region from the previous query.
 SELECT region, MAX(total_amt) AS max_sales
 FROM (SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_usd) AS total_amt
@@ -2073,6 +2102,7 @@ FROM (SELECT sales_reps.name AS sales_rep, region.name AS region, SUM(total_amt_
       ORDER BY total_amt DESC) AS t1
 GROUP BY region
 ORDER BY max_sales DESC;
+
 
 -- STEP 3: Pull the total number of orders for the region with the largest total_amt_usd sales.
 SELECT region.name as region_name, COUNT(orders.total) AS num_orders
@@ -2124,6 +2154,7 @@ FROM accounts
 GROUP BY account_name
 ORDER BY total_standard_qty DESC
 LIMIT 1;
+
 
 -- STEP 2: Find all the accounts with more total sales than the account with the most standard_qty paper purchased.
 -- Use the subquery from STEP 1
@@ -2271,12 +2302,13 @@ The outer query (SELECT AVG(total_amt) AS avg_total_amt ...) calculates the aver
 the subquery.
 */
 
-
 -- What is the lifetime average amount spent in terms of total_amt_usd, including only the companies that spent more
 -- per order, on average, than the average of all orders
+
 -- STEP 1: Find the average amount spent per order.
 SELECT AVG(total_amt_usd) AS avg_total_amt
 FROM orders;
+
 
 -- STEP 2: Find the average amount spent per order for companies that spent more per order than the average
 -- of all orders.
@@ -2299,13 +2331,16 @@ amount greater than the overall average order amount for all accounts.
 
 The innermost query calculates the average order amount for each account by grouping the orders by account_id and using
 the AVG function on total_amt_usd.
+
 The result of the innermost query is then filtered using the HAVING clause, which only includes the accounts that have
 an average order amount greater than the overall average order amount, which is calculated by the second query.
 The second query calculates the average order amount for all accounts by using the AVG function on total_amt_usd in the
 orders table.
+
 The result of the second query is then used as the threshold in the HAVING clause of the innermost query.
 The outermost query calculates the average of the average order amounts returned by the second query by using the AVG
 function on avg_total_amt.
+
 The final result is the average of the average order amounts for all accounts that have an average order amount greater
 than the overall average order amount for all accounts.
 */
@@ -2321,6 +2356,7 @@ In the next concept, we will walk through this example a bit more slowly to make
 between subqueries and these expressions down for you to use in practice!
 */
 
+
 -- You need to find the average number of events for each channel per day.
 -- STEP 1: Find the number of events for each channel per day.
 WITH events_per_day AS (
@@ -2333,7 +2369,18 @@ SELECT channel, AVG(events) AS avg_events
 FROM events_per_day
 GROUP BY channel
 ORDER BY avg_events DESC;
+/*
+This is a SQL query that calculates the average number of events per day for each channel. The query consists of two
+parts:
+The WITH clause: This creates a derived table named "events_per_day". The derived table contains the following columns:
+"day", "channel", and "events". The "day" column is created by using the DATE_TRUNC function to round the "occurred_at"
+column to the nearest day. The "channel" and "events" columns are aggregated from the "web_events" table by grouping
+the data by day and channel and counting the number of events for each group.
 
+The SELECT clause: This selects the "channel" and "avg_events" columns from the derived table "events_per_day". The
+"avg_events" column is calculated as the average number of events per day by grouping the data by "channel". Finally,
+the results are ordered by the "avg_events" column in descending order.
+*/
 
 -- Using the WITH statement
 -- Provide the name of the sales_rep in each region with the largest amount of total_amt_usd sales.
@@ -2368,7 +2415,6 @@ the region_name and total_amt in "t2". This results in the rep_name and region_n
 total sales.
 */
 
-
 -- For the region with the largest sales total_amt_usd, how many total orders were placed?
 -- Using the WITH statement
 WITH t1 AS (SELECT region.name AS region_name,
@@ -2394,6 +2440,7 @@ FROM sales_reps
 GROUP BY region.name
 HAVING SUM(orders.total_amt_usd) = (SELECT *
                     FROM t2);
+
 
 -- For the account that purchased the most (in total over their lifetime as a customer) standard_qty paper, how many
 -- accounts still had more in total purchases?
@@ -2489,7 +2536,6 @@ CREATE TABLE customer_data (
   location VARCHAR(50)
 );
 
-
 -- Insert data into customer_data.
 INSERT INTO customer_data (first_name, last_name,  phone_number, location)
 VALUES
@@ -2518,8 +2564,6 @@ VALUES
   ('Elijah', 'Walker', '301-764-8097', 'Columbus, OH'),
   ('Ava', 'Wright', '202-313-9087', 'San Francisco, CA'),
   ('William', 'Allen', '203-541-5423', 'Washington, DC');
-
-
 
 -- Show data in customer_data
 SELECT * FROM customer_data;
@@ -2597,14 +2641,24 @@ SELECT CASE WHEN LEFT(name, 1) ~ '[aeiou]' OR LEFT(name, 1) ~ '[AEIOU]'
        COUNT(*) AS num
 FROM accounts
 GROUP BY group_name;
-
 /*
+This code is a SQL query that uses a CASE statement to categorize the names of accounts based on the first letter of
+their name. The query uses the LEFT function to get the first letter of the name column, and then the ~ operator to
+check if the first letter is a vowel. If it is, then the CASE statement assigns the value 'starts with a vowel' to the
+group_name column. If the first letter is not a vowel, then the value 'starts with anything else' is assigned.
+
+The query then uses the COUNT function to count the number of accounts in each group, and the GROUP BY clause to group
+the data by the group_name column. The query then orders the results by the number of accounts in each group, in
+descending order.
+
+
 LOWER
 LOWER converts all characters in a specified column to lowercase.
 
 UPPER
 UPPER converts all characters in a specified column to uppercase.
 */
+
 -- Use the customer_data table to create a new column called first_name_lower that contains the lowercase version of
 -- the first_name column and first_name_upper that contains the uppercase version of the first_name column.
 SELECT first_name, LOWER(first_name) AS first_name_lower, UPPER(first_name) AS first_name_upper
@@ -2654,20 +2708,1132 @@ LIMIT 10;
 SELECT name, LEFT(name, POSITION(' ' IN name) - 1) AS first_name,
        RIGHT(name, LENGTH(name) - POSITION(' ' IN name)) AS last_name
 FROM sales_reps
-LIMIT 10;
-
+LIMIT 20;
 
 /*
 REPLACE takes a column, a character to replace, and a character to replace it with. Here, you saw that you could
 replace all instances of a comma with a space as REPLACE(city_state, ',', ' ').
 */
+
 -- Use REPLACE to replace all instances of a comma with a space in the location column in the customer_data table.
 SELECT location, REPLACE(location, ',', ' ') AS location_replaced
 FROM customer_data
+LIMIT 25;
+
+/*
+SUBSTRING takes a column, a starting index, and an optional length. Here, you saw that you could pull the first
+three characters of a column as SUBSTRING(city_state, 1, 3).
+*/
+
+-- Use SUBSTRING to pull the first three characters of the location column in the customer_data table.
+SELECT location, SUBSTRING(location, 1, 3) AS first_three
+FROM customer_data
+LIMIT 22;
+
+/*
+CONCAT
+CONCAT takes two columns and combines them into one column. Here, you saw that you could combine the first and
+last name columns into a full name column as CONCAT(first_name, ' ', last_name).
+
+PIPE (||)
+The pipe (||) is another way to combine columns. Here, you saw that you could combine the first and last name
+columns into a full name column as first_name || ' ' || last_name.
+*/
+
+-- Use both CONCAT and PIPE (||) to combine the first and last name columns in the customer_data table into a full
+-- name column.
+SELECT first_name, last_name, CONCAT(first_name, ' ', last_name) AS full_name,
+       first_name || ' ' || last_name AS full_name_pipe
+FROM customer_data
+LIMIT 15;
+
+-- Each company in the accounts table wants to create an email address for each primary_poc. The email address should
+-- be the first name of the primary_poc . last name primary_poc @ company name .com.
+-- Remember to remove any spaces from the company name and make the email address lowercase.
+SELECT primary_poc, name, CONCAT(LOWER(LEFT(primary_poc, POSITION(' ' IN primary_poc) - 1)), '.',
+                                 LOWER(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc))), '@',
+                                 REPLACE(LOWER(name), ' ', ''), '.com') AS email
+FROM accounts
+LIMIT 20;
+
+-- We would also like to create an initial password, which they will change after their first log in. The first
+-- password will be the first letter of the primary_poc's first name (lowercase), then the last letter of their
+-- first name (lowercase), the first letter of their last name (lowercase), the last letter of their last name
+-- (lowercase), the number of letters in their first name, the number of letters in their last name, and then the
+-- name of the company they are working with, all capitalized with no spaces.
+SELECT primary_poc, name, CONCAT(LOWER(LEFT(primary_poc, 1)), LOWER(RIGHT(primary_poc, 1)),
+                                 LOWER(LEFT(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)), 1)),
+                                 LOWER(RIGHT(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)), 1)),
+                                 LENGTH(REPLACE(primary_poc, ' ', '')),
+                                 UPPER(REPLACE(name, ' ', ''))) AS password
+FROM accounts
+LIMIT 20;
+
+-- The above query is a bit long and hard to read. Let's break it up into multiple steps.
+SELECT primary_poc, name,
+       LOWER(LEFT(primary_poc, 1)) AS first_initial,
+       LOWER(RIGHT(primary_poc, 1)) AS last_initial,
+       LOWER(LEFT(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)), 1)) AS first_last_initial,
+       LOWER(RIGHT(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)), 1)) AS last_last_initial,
+       LENGTH(REPLACE(primary_poc, ' ', '')) AS name_length,
+       UPPER(REPLACE(name, ' ', '')) AS company_name
+FROM accounts
+LIMIT 20;
+
+-- Get the length of the first name and last name.
+SELECT primary_poc, name,
+       LENGTH(LEFT(primary_poc, POSITION(' ' IN primary_poc) - 1)) AS first_name_length,
+       LENGTH(RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc))) AS last_name_length
+FROM accounts
+LIMIT 25;
+
+
+/*
+CAST
+CAST takes a column and converts it to a different data type.
+*/
+
+-- create a crime_data table.
+CREATE TABLE crime_data (
+    incidnt_num VARCHAR(250),
+    category VARCHAR(250),
+    descript VARCHAR(300),
+    day_of_week VARCHAR(250),
+    date VARCHAR(300),
+    time VARCHAR(300),
+    pd_district VARCHAR(300),
+    resolution VARCHAR(250),
+    address VARCHAR(300),
+    lon VARCHAR(250),
+    lat VARCHAR(250),
+    location VARCHAR(300),
+    id VARCHAR(50)
+    );
+
+-- I used pgAdmin to import the CSV file into the crime_data table
+
+-- Select the first 10 rows from the crime_data table.
+SELECT *
+FROM crime_data
 LIMIT 10;
 
+-- Use SUBSTRING and CONCAT to create a new column called date_time ih the format yyyy-mm-dd
+SELECT date, time, CONCAT(SUBSTRING(date, 7, 4), '-', SUBSTRING(date, 1, 2), '-', SUBSTRING(date, 4, 2))
+    AS date_time
+FROM crime_data;
+
+-- Use ::DATE to convert the date column to a date data type.
+-- Use SUBSTR to convert the date column to format yyyy-mm-dd.
+SELECT date, time,  (SUBSTR(date, 7, 4) || '-' || SUBSTR(date, 1, 2) || '-' || SUBSTR(date, 4, 2))::DATE AS date_date
+FROM crime_data;
 
 
+
+/*
+COALESCE
+COALESCE takes multiple columns and returns the first non-null value.
+*/
+SELECT *
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id
+WHERE o.total IS NULL;
+
+
+-- Use COALESCE to fill the accounts.id column with the account.id for the NULL values
+SELECT COALESCE(o.id, a.id) AS filled_id, a.name, a.website, a.lat,
+       a.lon, a.primary_poc, a.sales_rep_id, o.*
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id
+WHERE o.total IS NULL;
+
+
+-- Use COALESCE to fill the orders.account_id column with the account.id for the NULL values
+SELECT COALESCE(o.id, a.id) AS filled_id, a.name, a.website, a.lat,
+       a.lon, a.primary_poc, a.sales_rep_id, COALESCE(o.account_id, a.id) as account_id,  o.*
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id
+WHERE o.total IS NULL;
+
+
+-- Use COALESCE to fill the qty and usd columns with 0 for the NULL values
+SELECT COALESCE(o.id, a.id) AS filled_id, a.name, a.website, a.lat, a.lon, a.primary_poc, a.sales_rep_id,
+       COALESCE(o.account_id, a.id) as account_id, o.occurred_at, COALESCE(o.standard_qty, 0) as standard_qty,
+       COALESCE(o.gloss_qty,0) as gloss_qty, COALESCE(o.poster_qty,0) as poster_qty, COALESCE(o.total,0) as total,
+       COALESCE(o.standard_amt_usd,0) as standard_amt_usd, COALESCE(o.gloss_amt_usd,0) as gloss_amt_usd,
+       COALESCE(o.poster_amt_usd,0) as poster_amt_usd, COALESCE(o.total_amt_usd,0) as total_amt_usd
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id
+WHERE o.total IS NULL;
+
+
+-- Run the query again to see the results with where removed.
+SELECT COUNT(*)
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id;
+
+-- Run the query again to see the results with where removed.
+SELECT COALESCE(o.id, a.id) filled_id, a.name, a.website, a.lat, a.lon, a.primary_poc, a.sales_rep_id,
+       COALESCE(o.account_id, a.id) as account_id, o.occurred_at, COALESCE(o.standard_qty, 0) as standard_qty,
+       COALESCE(o.gloss_qty,0) as gloss_qty, COALESCE(o.poster_qty,0) as poster_qty, COALESCE(o.total,0) as total,
+       COALESCE(o.standard_amt_usd,0) as standard_amt_usd, COALESCE(o.gloss_amt_usd,0) as gloss_amt_usd,
+       COALESCE(o.poster_amt_usd,0) as poster_amt_usd, COALESCE(o.total_amt_usd,0) as total_amt_usd
+FROM accounts a
+LEFT JOIN orders o
+ON a.id = o.account_id;
+
+
+/*
+SQL Window Functions
+Window functions are a powerful tool that allow you to perform calculations on a set of rows.
+
+Window functions are used in SQL to perform calculations across rows of a query result, similar to aggregate functions.
+However, unlike aggregate functions, which return a single result per group, window functions return a value for each
+row based on calculations performed over a specified set of rows, referred to as a "window".
+
+Some common uses of window functions include calculating cumulative totals, running totals, percentiles, and rankings.
+Examples of window functions include:
+- ROW_NUMBER()
+- RANK()
+- DENSE_RANK()
+- PERCENT_RANK()
+- NTILE()
+- LAG()
+- LEAD()
+- FIRST_VALUE()
+- LAST_VALUE()
+- NTH_VALUE()
+
+Window functions are used in conjunction with the OVER clause, which specifies the window over which the window
+function will be applied.
+
+The OVER clause can be used in the
+SELECT, WHERE, and ORDER BY clauses.
+
+Examples of window functions used in the SELECT clause:
+SELECT order_id, product, price, SUM(price) OVER (ORDER BY order_id) AS running_total
+FROM sales
+ORDER BY order_id;
+
+This query calculates the running total of price for each row in the sales table, ordered by order_id. The window
+function SUM(price) OVER (ORDER BY order_id) calculates the cumulative sum of price for each row, based on the
+specified window ORDER BY order_id. The result is a table that displays the running total for each row in the sales
+table.
+*/
+
+--Create a empsalary table for the next few exercises
+CREATE TABLE empsalary (
+  id serial PRIMARY KEY,
+  emp_no integer,
+  name text,
+  dep_id text,
+  salary numeric,
+  enroll_date date
+);
+
+-- Insert some data into the empsalary table
+INSERT INTO empsalary (emp_no, name, dep_id, salary, enroll_date)
+VALUES
+  (101, 'John Doe', '1356', 53000, '2012-01-18'),
+  (102, 'Jane Doe', '1356', 75000, '2016-02-11'),
+  (103, 'Jim Smith', '8567', 90000, '2020-03-17'),
+  (104, 'Sarah Johnson', '1356', 35000, '2021-04-11'),
+  (105, 'Bob Brown', '1234', 52000, '2020-05-16'),
+  (106, 'Liam Davis', '1356', 55000, '2020-06-21'),
+  (107, 'Emma Wilson', '1356', 130000, '2015-07-01'),
+  (108, 'Olivia Taylor', '1234', 35000, '2010-08-25'),
+  (109, 'Noah Jones', '1234', 57000, '2017-09-21'),
+  (110, 'Ethan Clark', '1356', 85000, '2018-10-18'),
+  (111, 'Ava Lewis', '8567', 125000, '2019-11-19'),
+  (112, 'Isabella Parker', '1356', 45000, '2022-12-15'),
+  (113, 'William Davis', '1234', 87000, '2023-01-04'),
+  (114, 'Mia Anderson', '1356', 35000, '2017-02-09'),
+  (115, 'Jacob Wilson', '1356', 63000, '2017-03-01'),
+  (116, 'Sophia Davis', '1234', 58000, '2020-04-21'),
+  (117, 'Michael Wilson', '1234', 44000, '2016-05-19'),
+  (118, 'Emily Anderson', '1356', 61000, '2020-06-28'),
+  (119, 'Matthew Davis', '8567', 82000, '2021-07-26'),
+  (120, 'Madison Wilson', '1234', 59000, '2022-08-25'),
+  (121, 'Rellika Kisyula', '8567', 138000, '2009-09-23'),
+  (122, 'Madison Wilson', '1390', 59000, '2022-08-25'),
+  (123, 'Emily Lee', '1356', 77000, '2020-06-05'),
+  (124, 'Ava Johnson', '1356', 83000, '2021-03-21'),
+  (125, 'Isabella Smith', '1234', 49000, '2019-10-15'),
+  (126, 'Sophia Davis', '1234', 85000, '2023-01-10'),
+  (127, 'Charlotte Brown', '1390', 58000, '2017-11-25'),
+  (128, 'Mia Wilson', '1390', 93000, '2010-01-12'),
+  (129, 'Amelia Jones', '1356', 61000, '2011-07-18'),
+  (130, 'Harper Allen', '1356', 97000, '2012-04-12'),
+  (131, 'Evelyn King', '1234', 65000, '2013-02-17'),
+  (132, 'Abigail Miller', '1234', 69000, '2014-05-22'),
+  (133, 'Emily Baker', '1234', 68000, '2015-03-28'),
+  (134, 'Elizabeth Hernandez', '1390', 56000, '2016-01-10'),
+  (135, 'Avery Martinez', '1390', 83000, '2017-09-15'),
+  (136, 'Sofia Anderson', '8567', 86000, '2018-07-01'),
+  (137, 'Ella Thomas', '1390', 67000, '2019-04-20'),
+  (138, 'Scarlett Moore', '1356', 99000, '2020-12-31'),
+  (139, 'Aurora Jackson', '1234', 72000, '2021-08-10'),
+  (140, 'Victoria Adams', '1356', 85000, '2022-06-15');
+/*
+The empsalary table contains the following data for employees in a company such as salary, department, and
+enrollment date.
+*/
+
+--Create a departments table for the next few exercises
+CREATE TABLE departments (
+  id serial PRIMARY KEY,
+  dep_id text,
+  dep_name text,
+  dep_location text
+);
+--Insert data into the departments table
+INSERT INTO departments (dep_id, dep_name, dep_location)
+VALUES
+  ('1234', 'Accounting', 'Lansing'),
+  ('1356', 'Sales', 'Chicago'),
+  ('8567', 'IT', 'Boston'),
+  ('1390', 'Engineering', 'New York');
+
+-- Compare each employee's salary with the average salary in his or her department
+-- Use JOIN to combine the empsalary and departments tables
+SELECT e.name, e.salary, d.dep_name, d.dep_location,
+       AVG(e.salary) OVER (PARTITION BY d.dep_name) AS avg_dep_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+ORDER BY d.dep_name, e.salary DESC;
+/*
+The first three output columns come directly from the table empsalary, and there is one output row for each row in the
+table. The fourth column represents an average taken across all the table rows that have the same dep_name value as the
+current row. (This actually is the same function as the non-window avg aggregate, but the OVER clause causes it to be
+treated as a window function and computed across the window frame.)
+
+A window function call always contains an OVER clause directly following the window function's name and argument(s).
+This is what syntactically distinguishes it from a normal function or non-window aggregate. The OVER clause determines
+exactly how the rows of the query are split up for processing by the window function. The PARTITION BY clause within
+OVER divides the rows into groups, or partitions, that share the same values of the PARTITION BY expression(s).
+For each row, the window function is computed across the rows that fall into the same partition as the current row.
+
+You can also control the order in which rows are processed by window functions using ORDER BY within OVER.
+(The window ORDER BY does not even have to match the order in which the rows are output.) Here is an example:
+SELECT name, salary, dep_name, dep_location,
+       RANK() OVER (PARTITION BY dep_name ORDER BY salary DESC) AS dep_rank
+FROM empsalary
+JOIN departments
+ON empsalary.dep_id = departments.dep_id
+ORDER BY dep_name, salary DESC;
+*/
+
+-- Perform ranking of employees within each department based on salary
+SELECT e.name, e.salary, d.dep_name, d.dep_location,
+       RANK() OVER (PARTITION BY d.dep_name ORDER BY e.salary DESC) AS dep_rank
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+ORDER BY d.dep_name, e.salary DESC;
+/*
+As shown here, the rank function produces a numerical rank for each distinct ORDER BY value in the current row's
+partition, using the order defined by the ORDER BY clause. rank needs no explicit parameter, because its behavior is
+entirely determined by the OVER clause.
+
+The rows considered by a window function are those of the “virtual table” produced by the query's FROM clause as
+filtered by its WHERE, GROUP BY, and HAVING clauses if any. For example, a row removed because it does not meet the
+WHERE condition is not seen by any window function. A query can contain multiple window functions that slice up the
+data in different ways using different OVER clauses, but they all act on the same collection of rows defined by this
+virtual table.
+
+We already saw that ORDER BY can be omitted if the ordering of rows is not important. It is also possible to omit
+PARTITION BY, in which case there is a single partition containing all rows.
+
+There is another important concept associated with window functions: for each row, there is a set of rows within its
+partition called its window frame. Some window functions act only on the rows of the window frame, rather than of the
+whole partition. By default, if ORDER BY is supplied then the frame consists of all rows from the start of the
+partition up through the current row, plus any following rows that are equal to the current row according to the
+ORDER BY clause. When ORDER BY is omitted the default frame consists of all rows in the partition. [5] Here is an
+example using sum:
+
+SELECT salary, sum(salary) OVER () FROM empsalary;
+*/
+SELECT salary, sum(salary) OVER () FROM empsalary;
+/*
+Above, since there is no ORDER BY in the OVER clause, the window frame is the same as the partition, which for lack of
+PARTITION BY is the whole table; in other words each sum is taken over the whole table and so we get the same result
+for each output row.
+
+But if we add an ORDER BY clause, we get very different results:
+SELECT salary, sum(salary) OVER (ORDER BY salary) FROM empsalary;
+*/
+SELECT salary, sum(salary) OVER (ORDER BY salary) FROM empsalary;
+/*
+Here the sum is taken from the first (lowest) salary up through the current one, including any duplicates of
+the current one (notice the results for the duplicated salaries). The sum for the last row is the sum of all the
+salaries in the table.
+
+Window functions are permitted only in the SELECT list and the ORDER BY clause of the query. They are forbidden
+elsewhere, such as in GROUP BY, HAVING and WHERE clauses. This is because they logically execute after the processing
+of those clauses. Also, window functions execute after non-window aggregate functions. This means it is valid to
+include an aggregate function call in the arguments of a window function, but not vice versa.
+
+If there is a need to filter or group rows after the window calculations are performed, you can use a sub-select.
+For example:
+*/
+SELECT dep_name, emp_no, salary, enroll_date
+FROM
+  (SELECT d.dep_name, e.emp_no, salary, enroll_date,
+          rank() OVER (PARTITION BY d.dep_name ORDER BY salary DESC, e.emp_no) AS pos
+     FROM empsalary e JOIN departments d ON (e.dep_id = d.dep_id)
+  ) AS ss
+WHERE pos < 3
+ORDER BY salary DESC;
+/*
+The sub-select computes the rank for each row, and the outer query uses it to select the top two employees in each
+department. The sub-select is also useful for adding a column to the output that is not part of the window function
+calculation.
+
+The above query only shows the rows from the inner query having rank less than 3.
+
+When a query involves multiple window functions, it is possible to write out each one with a separate OVER clause,
+but this is duplicative and error-prone if the same windowing behavior is wanted for several functions. Instead, each
+windowing behavior can be named in a WINDOW clause and then referenced in OVER. For example:
+*/
+SELECT sum(e.salary) OVER w, avg(salary) OVER w
+  FROM empsalary e
+  JOIN departments d ON (e.dep_id = d.dep_id)
+  WINDOW w AS (PARTITION BY d.dep_name ORDER BY salary DESC);
+
+-- Find the top 1 employee in each department based on salary.
+SELECT dep_name, emp_no, salary, enroll_date
+FROM
+  (SELECT d.dep_name, e.emp_no, salary, enroll_date,
+          rank() OVER (PARTITION BY d.dep_name ORDER BY salary DESC, e.emp_no) AS pos
+     FROM empsalary e JOIN departments d ON (e.dep_id = d.dep_id)
+  ) AS ss
+WHERE pos = 1;
+/*
+This code is a SQL query that retrieves data from two tables "empsalary" and "departments". The query first performs
+a join between the two tables on the "dep_id" column, combining the relevant information from both tables into one
+result set. The query then calculates the "pos" value for each row in the result set, using the "rank()" window
+function.
+
+The "rank()" function is used to determine the position of each row in the result set, based on the values of the
+"salary" and "emp_no" columns. The function uses the "PARTITION BY" clause to group the rows by department name
+("d.dep_name") and the "ORDER BY" clause to specify the sort order for each group (highest salary first, then employee
+number).
+
+Finally, the query filters the result set to only include rows where the "pos" value is equal to 1, using a "WHERE"
+clause. This results in a table that shows the department name, employee number, salary, and enrollment date for the
+employee with the highest salary in each department.
+*/
+
+-- Find the name, salary, and department and experience of each employee.
+-- The Experience is calculated as the difference between the current date and the date of joining.
+SELECT e.name, e.salary, d.dep_name, d.dep_location,
+       age(current_date, e.enroll_date) AS experience
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+ORDER BY d.dep_name, e.salary DESC
+LIMIT 20;
+
+-- Find employees who have been with the company for more than 4 years.
+SELECT e.name, e.salary, d.dep_name, d.dep_location,
+       DATE_PART('year', age(current_date, e.enroll_date)) AS year_in_company
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE DATE_PART('year', age(current_date, e.enroll_date)) > 2;
+
+-- Find the average salary of employees in each department.
+SELECT d.dep_name, d.dep_location, AVG(e.salary)
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+ORDER BY d.dep_name;
+
+-- Find the name, salary, and department of employees whose salary is greater than the average salary of the
+-- department.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.salary > (SELECT AVG(salary) FROM empsalary WHERE dep_id = e.dep_id)
+ORDER BY d.dep_name, e.salary DESC;
+
+
+-- Find employees who work in the same department as the employee with the highest salary.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary ORDER BY salary DESC LIMIT 1)
+ORDER BY d.dep_name, e.salary DESC;
+
+
+-- Find the employees who work in the same department as Rellika Kisyula.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Rellika Kisyula')
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find the employees who work in the same department as Matthew Davis and have a salary greater than his.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Matthew Davis')
+AND e.salary > (SELECT salary FROM empsalary WHERE name = 'Matthew Davis')
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find employee whose is paid more in department of Mia Anderson.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Matthew Davis')
+AND e.salary = (SELECT MAX(salary) FROM empsalary WHERE dep_id = e.dep_id)
+ORDER BY d.dep_name, e.salary DESC;
+/*
+The query only selects data where the "dep_id" of the employee in the "empsalary" table matches the "dep_id" of the
+employee whose name is "Matthew Davis", and the salary of the employee matches the maximum salary of all employees
+within that department.
+Finally, the data is ordered by the department name and then by the salary of the employee in descending order.
+*/
+
+-- Find the employee who joined the company latest
+SELECT e.name, e.salary, d.dep_name, d.dep_location, e.enroll_date
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.enroll_date = (SELECT MAX(enroll_date) FROM empsalary)
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find the employee who joined the company earliest in each department.
+SELECT e.name, e.salary, d.dep_name, d.dep_location, e.enroll_date
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.enroll_date = (SELECT MIN(enroll_date) FROM empsalary WHERE dep_id = e.dep_id)
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find the total salary of each department.
+SELECT d.dep_name, d.dep_location, SUM(e.salary) AS total_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+ORDER BY d.dep_name, d.dep_location;
+
+-- Find the total salary of the department with the highest salary.
+SELECT d.dep_name, d.dep_location, SUM(e.salary) AS total_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+HAVING SUM(e.salary) = (SELECT MAX(total_salary) FROM
+                        (SELECT  SUM(e.salary) AS total_salary
+                         FROM empsalary e
+                         JOIN departments d
+                         ON e.dep_id = d.dep_id
+                         GROUP BY d.dep_name, d.dep_location) AS ss)
+ORDER BY d.dep_name, d.dep_location;
+/*
+The query uses a subquery to find the maximum total salary of all departments.
+
+This code performs the following steps to find the department with the highest total salary:
+
+Joins the "empsalary" and "departments" tables on the "dep_id" column.
+Groups the data by "dep_name" and "dep_location".
+Sums up the "salary" column for each group.
+Uses a nested SELECT statement to find the maximum total salary across all departments.
+Filters the results to only include departments with a total salary equal to the maximum found in the previous step.
+Orders the final results by "dep_name" and "dep_location".
+*/
+
+-- Find the total salary of the department where Ethan Clark works.
+SELECT d.dep_name, d.dep_location, SUM(e.salary) AS total_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Ethan Clark')
+GROUP BY d.dep_name, d.dep_location
+ORDER BY d.dep_name, d.dep_location;
+/*
+This code returns the department name, location and total salary of the employees in a department where the employee
+named 'Ethan Clark' works.
+
+Steps:
+It selects the department name, department location and the sum of employee salaries from the empsalary table (e) and
+departments table (d).
+
+The empsalary and departments tables are joined on the 'dep_id' column, which is a foreign key in the empsalary table
+that refers to the primary key in the departments table.
+
+It filters the results to only include the department where the employee named 'Ethan Clark' works. This is done using
+a subquery in the WHERE clause that retrieves the 'dep_id' of the employee named 'Ethan Clark' from the empsalary table.
+
+The results are grouped by department name and location and ordered by the department name and location.
+
+The final result shows the department name, location, and total salary for the department where the employee named
+'Ethan Clark' works.
+*/
+
+-- Find employees whose salary is greater that average salary of department where Ethan Clark works.
+-- STEP 1: Find average salary of department where Ethan Clark works.
+SELECT AVG(e.salary) AS avg_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Ethan Clark');
+
+-- STEP 2: Find employees whose salary is greater that average salary of department where Ethan Clark works.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.salary > (SELECT AVG(e.salary) AS avg_salary
+                  FROM empsalary e
+                  JOIN departments d
+                  ON e.dep_id = d.dep_id
+                  WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Ethan Clark'))
+ORDER BY d.dep_name, e.salary DESC;
+-- How many employees work in each department?
+SELECT d.dep_name, d.dep_location, COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+ORDER BY num_employees DESC;
+/*
+This SQL code is selecting the department name, department location, and count of employees in each department.
+The data is being fetched from two tables: "empsalary" and "departments". The join condition is used to link the two
+tables on the "dep_id" column.
+The SELECT statement is retrieving the department name and location, as well as counting the number of employees in
+each department. The result of this count is stored in the "num_employees" column.
+The "GROUP BY" clause is grouping the data by the department name and location so that we get an aggregated result
+for each department.
+The "ORDER BY" clause is sorting the result in descending order based on the number of employees in each department.
+*/
+
+-- Find those departments where maximum number of employees work
+SELECT d.dep_name, d.dep_location, COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+HAVING COUNT(e.name) = (SELECT MAX(num_employees) FROM
+                        (SELECT COUNT(e.name) AS num_employees
+                         FROM empsalary e
+                         JOIN departments d
+                         ON e.dep_id = d.dep_id
+                         GROUP BY d.dep_name, d.dep_location) AS ss)
+ORDER BY d.dep_name, d.dep_location;
+/*
+This code is used to find the department with the most employees, along with the number of employees and the location
+of that department.
+
+The steps involved in this code are:
+
+Join the empsalary and departments tables on dep_id.
+Group the result by dep_name and dep_location.
+Count the number of employees in each group and label it as num_employees.
+Find the department with the maximum number of employees by selecting the MAX num_employees from a subquery.
+Filter the result from step 4 to get only departments with the maximum number of employees, using a HAVING clause.
+Order the result by dep_name and dep_location.
+*/
+
+-- Find employees who dont work in the department where maximum number of employees work
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id <> (SELECT dep_id FROM
+                   (SELECT d.dep_id
+                    FROM empsalary e
+                    JOIN departments d
+                    ON e.dep_id = d.dep_id
+                    GROUP BY d.dep_name, d.dep_id
+                    HAVING COUNT(e.name) = (SELECT MAX(num_employees) FROM
+                                            (SELECT COUNT(e.name) AS num_employees
+                                             FROM empsalary e
+                                             JOIN departments d
+                                             ON e.dep_id = d.dep_id
+                                             GROUP BY d.dep_name, d.dep_location) AS ss)) AS ss)
+ORDER BY d.dep_name, e.salary DESC;
+/*
+This SQL query retrieves the name, salary, department name and location of all employees from the "empsalary" table
+and joins it with the "departments" table. The "ON" clause specifies the join condition that the "dep_id" in the
+"empsalary" table must match the "dep_id" in the "departments" table.
+
+The query then filters the results to exclude all employees that belong to the department with the most number of
+employees using a subquery. The subquery first counts the number of employees per department and location, then finds
+the maximum count using another subquery. The "HAVING" clause in the subquery filters the result to only include
+departments with the maximum count of employees.
+
+The final result is sorted by the department name and then the employee salary in descending order.
+*/
+
+/*
+You can also use the following STEPS to solve the above problem:
+STEP 1: Find the department where maximum number of employees work.
+STEP 2: Find employees who dont work in the department where maximum number of employees work.
+*/
+
+
+-- Find the department where maximum number of employees work.
+SELECT d.dep_name, d.dep_location, COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+HAVING COUNT(e.name) = (SELECT MAX(num_employees) FROM
+                        (SELECT COUNT(e.name) AS num_employees
+                         FROM empsalary e
+                         JOIN departments d
+                         ON e.dep_id = d.dep_id
+                         GROUP BY d.dep_name, d.dep_location) AS ss)
+ORDER BY d.dep_name, d.dep_location;
+
+-- Find employees who dont work in the department where maximum number of employees work.
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id <> (SELECT dep_id FROM
+                   (SELECT d.dep_id
+                    FROM empsalary e
+                    JOIN departments d
+                    ON e.dep_id = d.dep_id
+                    GROUP BY d.dep_name, d.dep_id
+                    HAVING COUNT(e.name) = (SELECT MAX(num_employees) FROM
+                                            (SELECT COUNT(e.name) AS num_employees
+                                             FROM empsalary e
+                                             JOIN departments d
+                                             ON e.dep_id = d.dep_id
+                                             GROUP BY d.dep_name, d.dep_location) AS ss)) AS ss)
+ORDER BY d.dep_name, e.salary DESC;
+
+-- You can also use LIMIT clause to find the department where maximum number of employees work.
+SELECT d.dep_name, d.dep_location, COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+ORDER BY num_employees DESC
+LIMIT 1;
+
+
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.dep_id <> (SELECT d.dep_id
+                    FROM empsalary e
+                    JOIN departments d
+                    ON e.dep_id = d.dep_id
+                    GROUP BY d.dep_name, d.dep_id
+                    ORDER BY COUNT(e.name) DESC
+                    LIMIT 1)
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find those employees whose salary is equal or more to the average of maximum and minimum salary
+SELECT e.name, e.salary, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.salary >= (SELECT (MAX(salary) + MIN(salary))/2
+                   FROM empsalary e)
+ORDER BY d.dep_name, e.salary DESC;
+
+-- Find those departments where the number of character in the first name is equal to character in department name
+-- Use POSITION() function to find the position of the first space in the name.
+-- Use SUBSTRING() function to extract the first name.
+-- Use LENGTH() function to find the length of the first name.
+-- Use LENGTH() function to find the length of the department name.
+SELECT d.dep_name, d.dep_location, e.name
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE LENGTH(SUBSTRING(e.name, 1, POSITION(' ' IN e.name) - 1)) = LENGTH(d.dep_name)
+ORDER BY d.dep_name, e.name;
+
+
+-- Find employees who joined the company in the same date
+SELECT e.name, e.salary, e.enroll_date, d.dep_name, d.dep_location
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.enroll_date IN (SELECT enroll_date
+                         FROM empsalary
+                         GROUP BY enroll_date
+                         HAVING COUNT(name) > 1)
+ORDER BY e.enroll_date, e.salary DESC;
+
+-- Find department where more than average number of employees work
+-- STEP 1: Find the number of employees in each department.
+SELECT COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name;
+-- STEP 2: Find the average number of employees
+SELECT AVG(num_employees) FROM
+(SELECT COUNT(e.name) AS num_employees
+ FROM empsalary e
+ JOIN departments d
+ ON e.dep_id = d.dep_id
+ GROUP BY d.dep_name) AS ss;
+
+
+-- STEP 3: Find the departments where the number of employees is more than average number of employees.
+SELECT d.dep_name, d.dep_location, COUNT(e.name) AS num_employees
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+HAVING COUNT(e.name) > (SELECT AVG(num_employees) FROM
+                        (SELECT COUNT(e.name) AS num_employees
+                         FROM empsalary e
+                         JOIN departments d
+                         ON e.dep_id = d.dep_id
+                         GROUP BY d.dep_name) AS ss)
+ORDER BY d.dep_name, d.dep_location;
+
+
+-- Find recently hired employees in each department. The result should have 4 rows.
+SELECT d.dep_name, d.dep_location, e.name, e.enroll_date
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.enroll_date IN (SELECT MAX(enroll_date)
+                       FROM empsalary e
+                       WHERE e.dep_id = d.dep_id)
+ORDER BY d.dep_name, e.enroll_date;
+
+-- Find the department where the average salary is more than the average salary of the company.
+SELECT d.dep_name, d.dep_location, AVG(e.salary) AS avg_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name, d.dep_location
+HAVING AVG(e.salary) > (SELECT AVG(salary)
+                        FROM empsalary)
+ORDER BY d.dep_name, d.dep_location;
+
+-- Create a running total of standard_amt_usd (in the orders table) over order time.
+SELECT occurred_at, standard_amt_usd, SUM(standard_amt_usd) OVER (ORDER BY occurred_at) AS running_total
+FROM orders
+ORDER BY occurred_at
+LIMIT 10;
+
+-- Create a running total of standard_amt_usd (in the orders table) over order time, but this time, date truncate
+-- occurred_at by year and partition by that same year-truncated occurred_at variable
+SELECT DATE_TRUNC('year', occurred_at) as year, standard_amt_usd, SUM(standard_amt_usd)
+    OVER (PARTITION BY EXTRACT(YEAR FROM occurred_at) ORDER BY occurred_at) AS running_total
+FROM orders
+ORDER BY occurred_at;
+
+/*
+RANK()
+RANK() is a window function that assigns a rank to each row in a result set. The rank is based on the order of the rows
+in the result set. The first row has a rank of 1, the second row has a rank of 2, and so on. If two rows have the same
+value, the next row will have a rank that skips the next number in the sequence. For example, if the third and fourth
+rows have the same value, the next row will have a rank of 5.
+
+Example:
+SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS rank
+FROM empsalary
+ORDER BY salary DESC;
+
+In SQL, the RANK function is used to assign a unique rank or a numbering to each row within a result set based on a
+specific column.
+*/
+
+-- Find the rank of each employee based on salary
+SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS rank
+FROM empsalary
+ORDER BY salary DESC;
+
+-- Lets create a students table to demonstrate the use of RANK() function
+CREATE TABLE student (
+    id serial PRIMARY KEY,
+    student_number text NOT NULL,
+    name text NOT NULL,
+    english integer NOT NULL,
+    mathematics integer NOT NULL,
+    science integer NOT NULL,
+    kiswahili integer NOT NULL,
+    social_studies integer NOT NULL
+);
+
+INSERT INTO student (student_number, name, english, mathematics, science, kiswahili, social_studies)
+VALUES
+    ('s001', 'John Doe', 75, 83, 100, 85, 92),
+    ('s002', 'Jane Doe', 95, 75, 56, 87, 96),
+    ('s003', 'Jim Smith', 80, 85, 95, 75, 84),
+    ('s004', 'Lisa Williams', 92, 75, 94, 75, 73),
+    ('s005', 'Bob Johnson', 85, 93, 80, 79, 87),
+    ('s006', 'Mary Brown', 75, 89, 98, 83, 80),
+    ('s007', 'Patricia Jones', 65, 75, 70, 80, 90),
+    ('s008', 'Linda Miller', 80, 85, 95, 75, 80),
+    ('s009', 'Barbara Davis', 74, 78, 98, 87, 73),
+    ('s010', 'Elizabeth Garcia', 89, 90, 82, 75, 100);
+
+-- Let's see the students table
+SELECT * FROM student;
+
+-- Here's an example of using the RANK function in SQL to rank the students based on their total scores:
+SELECT student_number, name, english + mathematics + science + kiswahili + social_studies AS total,
+    RANK() OVER (ORDER BY english + mathematics + science + kiswahili + social_studies DESC) AS rank
+FROM student
+ORDER BY total DESC;
+/*
+This will give you a result set with the student number, name, total score, and their rank based on their total score,
+with 1 being the highest score.
+*/
+
+/*
+ROW_NUMBER()
+The ROW_NUMBER function in SQL is used to assign a unique number to each row within a result set. You can use the
+ROW_NUMBER function to assign a ranking to each row, which is useful for pagination and finding the top N records.
+
+For example, let's say you want to find the top 5 students in terms of total marks in the student table you created.
+You can use the ROW_NUMBER function as follows:
+
+SELECT student_number, name, english + mathematics + science + kiswahili + social_studies AS total,
+    ROW_NUMBER() OVER (ORDER BY english + mathematics + science + kiswahili + social_studies DESC) AS rank
+FROM student
+ORDER BY total DESC
+LIMIT 5;
+*/
+
+SELECT student_number, name, english + mathematics + science + kiswahili + social_studies AS total,
+    ROW_NUMBER() OVER (ORDER BY english + mathematics + science + kiswahili + social_studies DESC) AS rank
+FROM student
+ORDER BY total DESC
+LIMIT 5;
+
+-- We can also use WITH
+WITH student_rank AS (
+    SELECT student_number, name, english + mathematics + science + kiswahili + social_studies AS total,
+        ROW_NUMBER() OVER (ORDER BY english + mathematics + science + kiswahili + social_studies DESC) AS rank
+    FROM student
+    ORDER BY total DESC
+)
+SELECT student_number, name, total, rank
+FROM student_rank
+WHERE rank <= 3;
+
+SELECT name, mathematics, science, ROW_NUMBER() OVER (ORDER BY mathematics DESC) AS rank
+FROM student;
+/*
+This query returns name, mathematics, science from the student table and adds an additional column rank which is
+assigned a unique number based on the descending order of the mathematics score. The ROW_NUMBER() function assigns
+a unique number to each row within the result set, with the first row getting 1, the second row getting 2, and so on.
+The OVER clause defines the sorting order of the result set, in this case descending by mathematics.
+*/
+
+WITH student_scores AS (
+  SELECT id, name, english + mathematics + science + kiswahili + social_studies AS total_score
+  FROM student
+)
+SELECT id, name, total_score,
+       ROW_NUMBER() OVER (ORDER BY total_score DESC) AS rank
+FROM student_scores;
+/*
+In this example, a common table expression (CTE) student_scores is used to calculate the total score for each student
+by summing up their scores in each subject. The ROW_NUMBER() function is then used to assign a unique rank to each
+student based on their total score in descending order.
+*/
+
+-- Select the id, account_id, and total variable from the orders table, then create a column called total_rank that
+-- ranks this total amount of paper ordered (from highest to lowest) for each account using a partition. Your final
+-- table should have these four columns.
+SELECT id, account_id, total, ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY total DESC) AS total_rank
+FROM orders;
+
+-- NOTE: When you omit the ORDER BY clause in an aggregate with window functions, the order in which the rows are
+-- processed is undefined. This means that the result of the aggregate with the window function will also be undefined
+-- and can vary each time the query is run. It is therefore recommended to always include an ORDER BY clause to specify
+-- the order in which the rows should be processed when using window functions in aggregates.
+
+/*
+ALIASES FOR WINDOW FUNCTIONS
+The following aliases can be used for window functions in SQL:
+RANK() -> DENSE_RANK()
+RANK() -> ROW_NUMBER()
+*/
+
+-- When writing multiple window functions in a single query, you can use the following aliases to simplify the query:
+SELECT name, salary,
+    RANK() OVER main_window AS rank,
+    MIN(salary) OVER main_window AS min_salary,
+    MAX(salary) OVER main_window AS max_salary
+FROM empsalary
+WINDOW main_window AS (ORDER BY salary DESC);
+
+/*
+Now, create and use an alias to shorten the following query that has multiple window functions. Name the alias
+account_year_window, which is more descriptive than main_window.
+
+SELECT id,
+       account_id,
+       DATE_TRUNC('year',occurred_at) AS year,
+       DENSE_RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS dense_rank,
+       total_amt_usd,
+       SUM(total_amt_usd) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS sum_total_amt_usd,
+       COUNT(total_amt_usd) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS count_total_amt_usd,
+       AVG(total_amt_usd) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS avg_total_amt_usd,
+       MIN(total_amt_usd) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS min_total_amt_usd,
+       MAX(total_amt_usd) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS max_total_amt_usd
+FROM orders
+*/
+SELECT id,
+       account_id,
+       DATE_TRUNC('year',occurred_at) AS year,
+       DENSE_RANK() OVER account_year_window AS dense_rank,
+       total_amt_usd,
+       SUM(total_amt_usd) OVER account_year_window AS sum_total_amt_usd,
+       COUNT(total_amt_usd) OVER account_year_window AS count_total_amt_usd,
+       AVG(total_amt_usd) OVER account_year_window AS avg_total_amt_usd,
+       MIN(total_amt_usd) OVER account_year_window AS min_total_amt_usd,
+       MAX(total_amt_usd) OVER account_year_window AS max_total_amt_usd
+FROM orders
+WINDOW account_year_window AS (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at));
+
+/*
+COMPARING ROWS WITH PREVIOUS ROWS
+The LAG() and LEAD() functions can be used to compare the current row with the previous or next row in the result set.
+The LAG function takes two arguments: the first is the expression that you want to retrieve for the previous row, and
+the second is an offset that specifies how many rows back from the current row you want to retrieve the value from.
+
+The general syntax for the LAG() function is:
+LAG(column, offset, default_value) OVER (ORDER BY order_columns)
+Where: - column is the column you want to retrieve the value from.
+       - offset is the number of rows ahead to look.
+       - default_value is the value to return if there is no next row.
+       - ORDER BY is used to specify the order of the rows.
+
+For example:
+SELECT name,
+       english,
+       LAG(english, 1) OVER (ORDER BY id) AS prev_english
+FROM student;
+This query returns the name, english, and previous english score for each student in the student table. The LAG()
+function is used to retrieve the previous english score for each student, with the offset set to 1. This means that the
+previous english score is retrieved from the row that comes before the current row in the result set.
+The ORDER BY clause specifies the order in which the rows are processed, and the result set will be sorted by the
+id column in ascending order.
+*/
+SELECT name,
+       english,
+       LAG(english, 1) OVER (ORDER BY id) AS prev_english
+FROM student;
+
+/*
+The LEAD() function is similar to the LAG() function, except that it retrieves the value from the next row instead of
+the previous row. The LEAD() function takes two arguments: the first is the expression that you want to retrieve for
+the next row, and the second is an offset that specifies how many rows forward from the current row you want to
+retrieve the value from.
+
+The general syntax for the LEAD() function is:
+LEAD(column, offset, default_value) OVER (ORDER BY order_columns)
+Where: - column is the column you want to retrieve the value from.
+       - offset is the number of rows ahead to look.
+       - default_value is the value to return if there is no next row.
+       - ORDER BY is used to specify the order of the rows.
+
+For example:
+SELECT name,
+       english,
+       LEAD(english, 1) OVER (ORDER BY id) AS next_english
+FROM student;
+This query returns the name, english, and next english score for each student in the student table. The LEAD()
+function is used to retrieve the next english score for each student, with the offset set to 1. This means that the
+next english score is retrieved from the row that comes after the current row in the result set.
+The ORDER BY clause specifies the order in which the rows are processed, and the result set will be sorted by the
+id column in ascending order.
+
+You can use the LAG() and LEAD() functions to perform the following tasks:
+To find the next value in a sequence of data, such as calculating the next quarter's revenue based on current quarter's
+revenue.
+To compare the current row to the next row in a result set, such as calculating the increase or decrease in stock price
+from one day to the next.
+To perform a running calculation, such as finding the cumulative total of sales over a set of rows.
+To compute the difference between two rows, such as calculating the time elapsed between two events.
+*/
+SELECT name,
+       english,
+       LEAD(english, 1) OVER (ORDER BY id) AS next_english
+FROM student;
+
+/*
+PERCENTILE -NTILE() FUNCTION
+The NTILE() function divides the rows in a result set into a specified number of groups, and assigns a group number
+to each row. The NTILE() function takes one argument, which is the number of groups to divide the rows into. The
+groups are numbered from 1 to the number of groups specified.
+
+The general syntax for the NTILE() function is:
+NTILE(number_of_groups) OVER (ORDER BY order_columns)
+Where: - number_of_groups is the number of groups to divide the rows into.
+       - ORDER BY is used to specify the order of the rows.
+*/
+
+-- Calculate the 4th percentile of the students mathemathics score.
+SELECT name,
+       mathematics,
+       NTILE(4) OVER (ORDER BY mathematics) AS percentile
+FROM student;
+
+-- Calculating the 75th percentile in a mathematics score. Use WITH.
+WITH student_percentile AS (
+    SELECT name,
+           mathematics,
+           NTILE(4) OVER (ORDER BY mathematics) AS percentile
+    FROM student
+)
+SELECT name,
+       mathematics,
+       percentile
+FROM student_percentile
+WHERE percentile = 3;
+
+-- Use the NTILE functionality to divide the accounts into 4 levels in terms of the amount of standard_qty for their
+-- orders. Your resulting table should have the account_id, the occurred_at time for each order, the total amount of
+-- standard_qty paper purchased, and one of four levels in a standard_quartile column.
+
+SELECT account_id,
+       occurred_at,
+       standard_qty,
+       NTILE(4) OVER (PARTITION BY account_id ORDER BY standard_qty) AS standard_quartile
+FROM orders
+ORDER BY account_id DESC;
+
+-- Use the NTILE functionality to divide the accounts into two levels in terms of the amount of gloss_qty for their
+-- orders. Your resulting table should have the account_id, the occurred_at time for each order, the total amount of
+-- gloss_qty paper purchased, and one of two levels in a gloss_half column.
+SELECT account_id,
+       occurred_at,
+       gloss_qty,
+         NTILE(2) OVER (PARTITION BY account_id ORDER BY gloss_qty) AS gloss_half
+FROM orders
+ORDER BY account_id DESC;
+
+-- Use the NTILE functionality to divide the orders for each account into 100 levels in terms of the amount of
+-- total_amt_usd for their orders. Your resulting table should have the account_id, the occurred_at time for each
+-- order, the total amount of total_amt_usd paper purchased, and one of 100 levels in a total_percentile column.
+SELECT account_id,
+       occurred_at,
+       total_amt_usd,
+       NTILE(100) OVER (PARTITION BY account_id ORDER BY total_amt_usd) AS total_percentile
+FROM orders
+ORDER BY account_id DESC;
 
 
 
