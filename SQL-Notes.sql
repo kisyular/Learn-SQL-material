@@ -1598,7 +1598,7 @@ these years (12 for 2013 and 1 for 2017). Therefore, neither of these are evenly
 increasing year over year, with 2016 being the largest sales to date. At this rate, we might expect 2017 to have the
 largest sales.
 */
--- SELECT only the year and total sales for only 2013 and 2017 dont use between
+-- SELECT only the year and total sales for only 2013 and 2017 don't use between
 SELECT EXTRACT(year FROM occurred_at)  as year,
        EXTRACT(month FROM occurred_at) as month,
        SUM(total_amt_usd)              as total_sales
@@ -1829,8 +1829,8 @@ ORDER BY total_sales DESC;
 
 /*
 SQL SUBQUERIES AND TEMPORARY TABLES
-A subquery is a query that is nested inside another query, and it is used to retrieve data that will
-be used by the outer query. A subquery can be used in different clauses of an SQL statement, such as the SELECT, FROM,
+A sub-query is a query that is nested inside another query, and it is used to retrieve data that will
+be used by the outer query. A sub-query can be used in different clauses of an SQL statement, such as the SELECT, FROM,
 WHERE, and HAVING clauses.
 
 For example, the following SQL statement uses a subquery in the WHERE clause to retrieve all the
@@ -2935,53 +2935,35 @@ CREATE TABLE empsalary (
   enroll_date date
 );
 
+
 -- Insert some data into the empsalary table
 INSERT INTO empsalary (emp_no, name, dep_id, salary, enroll_date)
 VALUES
-  (101, 'John Doe', '1356', 53000, '2012-01-18'),
-  (102, 'Jane Doe', '1356', 75000, '2016-02-11'),
+  (101, 'John Doe', '1356', 91000, '2012-01-18'),
+  (102, 'Jane Doe', '1356', 77000, '2016-02-11'),
   (103, 'Jim Smith', '8567', 90000, '2020-03-17'),
   (104, 'Sarah Johnson', '1356', 35000, '2021-04-11'),
   (105, 'Bob Brown', '1234', 52000, '2020-05-16'),
-  (106, 'Liam Davis', '1356', 55000, '2020-06-21'),
-  (107, 'Emma Wilson', '1356', 130000, '2015-07-01'),
+  (106, 'Liam Davis', '1356', 56000, '2020-06-21'),
+  (107, 'Emma Wilson', '1356', 133000, '2015-07-01'),
   (108, 'Olivia Taylor', '1234', 35000, '2010-08-25'),
   (109, 'Noah Jones', '1234', 57000, '2017-09-21'),
-  (110, 'Ethan Clark', '1356', 85000, '2018-10-18'),
+  (110, 'Ethan Clark', '1390', 87000, '2018-10-18'),
   (111, 'Ava Lewis', '8567', 125000, '2019-11-19'),
-  (112, 'Isabella Parker', '1356', 45000, '2022-12-15'),
+  (112, 'Isabella Parker', '1356', 49000, '2022-12-15'),
   (113, 'William Davis', '1234', 87000, '2023-01-04'),
-  (114, 'Mia Anderson', '1356', 35000, '2017-02-09'),
+  (114, 'Mia Anderson', '1390', 39000, '2017-02-09'),
   (115, 'Jacob Wilson', '1356', 63000, '2017-03-01'),
   (116, 'Sophia Davis', '1234', 58000, '2020-04-21'),
   (117, 'Michael Wilson', '1234', 44000, '2016-05-19'),
-  (118, 'Emily Anderson', '1356', 61000, '2020-06-28'),
+  (118, 'Emily Anderson', '1390', 66000, '2020-06-28'),
   (119, 'Matthew Davis', '8567', 82000, '2021-07-26'),
-  (120, 'Madison Wilson', '1234', 59000, '2022-08-25'),
-  (121, 'Rellika Kisyula', '8567', 138000, '2009-09-23'),
-  (122, 'Madison Wilson', '1390', 59000, '2022-08-25'),
-  (123, 'Emily Lee', '1356', 77000, '2020-06-05'),
-  (124, 'Ava Johnson', '1356', 83000, '2021-03-21'),
-  (125, 'Isabella Smith', '1234', 49000, '2019-10-15'),
-  (126, 'Sophia Davis', '1234', 85000, '2023-01-10'),
-  (127, 'Charlotte Brown', '1390', 58000, '2017-11-25'),
-  (128, 'Mia Wilson', '1390', 93000, '2010-01-12'),
-  (129, 'Amelia Jones', '1356', 61000, '2011-07-18'),
-  (130, 'Harper Allen', '1356', 97000, '2012-04-12'),
-  (131, 'Evelyn King', '1234', 65000, '2013-02-17'),
-  (132, 'Abigail Miller', '1234', 69000, '2014-05-22'),
-  (133, 'Emily Baker', '1234', 68000, '2015-03-28'),
-  (134, 'Elizabeth Hernandez', '1390', 56000, '2016-01-10'),
-  (135, 'Avery Martinez', '1390', 83000, '2017-09-15'),
-  (136, 'Sofia Anderson', '8567', 86000, '2018-07-01'),
-  (137, 'Ella Thomas', '1390', 67000, '2019-04-20'),
-  (138, 'Scarlett Moore', '1356', 99000, '2020-12-31'),
-  (139, 'Aurora Jackson', '1234', 72000, '2021-08-10'),
-  (140, 'Victoria Adams', '1356', 85000, '2022-06-15');
+  (120, 'Rellika Kisyula', '8567', 138000, '2009-09-23');
 /*
-The empsalary table contains the following data for employees in a company such as salary, department, and
+The empsalary table contains the following data for employees in a company such as salary, department_id, and
 enrollment date.
 */
+
 
 --Create a departments table for the next few exercises
 CREATE TABLE departments (
@@ -3081,7 +3063,7 @@ include an aggregate function call in the arguments of a window function, but no
 If there is a need to filter or group rows after the window calculations are performed, you can use a sub-select.
 For example:
 */
-SELECT dep_name, emp_no, salary, enroll_date
+SELECT dep_name, emp_no, salary, enroll_date, pos
 FROM
   (SELECT d.dep_name, e.emp_no, salary, enroll_date,
           rank() OVER (PARTITION BY d.dep_name ORDER BY salary DESC, e.emp_no) AS pos
@@ -3137,7 +3119,7 @@ FROM empsalary e
 JOIN departments d
 ON e.dep_id = d.dep_id
 ORDER BY d.dep_name, e.salary DESC
-LIMIT 20;
+LIMIT 10;
 
 -- Find employees who have been with the company for more than 4 years.
 SELECT e.name, e.salary, d.dep_name, d.dep_location,
@@ -3145,15 +3127,15 @@ SELECT e.name, e.salary, d.dep_name, d.dep_location,
 FROM empsalary e
 JOIN departments d
 ON e.dep_id = d.dep_id
-WHERE DATE_PART('year', age(current_date, e.enroll_date)) > 2;
+WHERE DATE_PART('year', age(current_date, e.enroll_date)) > 2
+ORDER BY year_in_company DESC;
 
 -- Find the average salary of employees in each department.
 SELECT d.dep_name, d.dep_location, AVG(e.salary)
 FROM empsalary e
 JOIN departments d
 ON e.dep_id = d.dep_id
-GROUP BY d.dep_name, d.dep_location
-ORDER BY d.dep_name;
+GROUP BY d.dep_name, d.dep_location;
 
 -- Find the name, salary, and department of employees whose salary is greater than the average salary of the
 -- department.
@@ -3191,7 +3173,7 @@ WHERE e.dep_id = (SELECT dep_id FROM empsalary WHERE name = 'Matthew Davis')
 AND e.salary > (SELECT salary FROM empsalary WHERE name = 'Matthew Davis')
 ORDER BY d.dep_name, e.salary DESC;
 
--- Find employee whose is paid more in department of Mia Anderson.
+-- Find employee whose is paid more in department of Matthew Davis.
 SELECT e.name, e.salary, d.dep_name, d.dep_location
 FROM empsalary e
 JOIN departments d
@@ -3230,31 +3212,17 @@ ON e.dep_id = d.dep_id
 GROUP BY d.dep_name, d.dep_location
 ORDER BY d.dep_name, d.dep_location;
 
--- Find the total salary of the department with the highest salary.
-SELECT d.dep_name, d.dep_location, SUM(e.salary) AS total_salary
+
+-- Find the highest salary
+SELECT d.dep_name, MAX(e.salary) as salary
 FROM empsalary e
 JOIN departments d
 ON e.dep_id = d.dep_id
-GROUP BY d.dep_name, d.dep_location
-HAVING SUM(e.salary) = (SELECT MAX(total_salary) FROM
-                        (SELECT  SUM(e.salary) AS total_salary
-                         FROM empsalary e
-                         JOIN departments d
-                         ON e.dep_id = d.dep_id
-                         GROUP BY d.dep_name, d.dep_location) AS ss)
-ORDER BY d.dep_name, d.dep_location;
-/*
-The query uses a subquery to find the maximum total salary of all departments.
+GROUP BY d.dep_name
+ORDER BY salary DESC
+LIMIT 1;
 
-This code performs the following steps to find the department with the highest total salary:
 
-Joins the "empsalary" and "departments" tables on the "dep_id" column.
-Groups the data by "dep_name" and "dep_location".
-Sums up the "salary" column for each group.
-Uses a nested SELECT statement to find the maximum total salary across all departments.
-Filters the results to only include departments with a total salary equal to the maximum found in the previous step.
-Orders the final results by "dep_name" and "dep_location".
-*/
 
 -- Find the total salary of the department where Ethan Clark works.
 SELECT d.dep_name, d.dep_location, SUM(e.salary) AS total_salary
@@ -3348,7 +3316,7 @@ Filter the result from step 4 to get only departments with the maximum number of
 Order the result by dep_name and dep_location.
 */
 
--- Find employees who dont work in the department where maximum number of employees work
+-- Find employees who don't work in the department where maximum number of employees work
 SELECT e.name, e.salary, d.dep_name, d.dep_location
 FROM empsalary e
 JOIN departments d
@@ -3382,7 +3350,7 @@ The final result is sorted by the department name and then the employee salary i
 /*
 You can also use the following STEPS to solve the above problem:
 STEP 1: Find the department where maximum number of employees work.
-STEP 2: Find employees who dont work in the department where maximum number of employees work.
+STEP 2: Find employees who don't work in the department where maximum number of employees work.
 */
 
 
@@ -3400,7 +3368,7 @@ HAVING COUNT(e.name) = (SELECT MAX(num_employees) FROM
                          GROUP BY d.dep_name, d.dep_location) AS ss)
 ORDER BY d.dep_name, d.dep_location;
 
--- Find employees who dont work in the department where maximum number of employees work.
+-- Find employees who don't work in the department where maximum number of employees work.
 SELECT e.name, e.salary, d.dep_name, d.dep_location
 FROM empsalary e
 JOIN departments d
@@ -3785,7 +3753,7 @@ Where: - number_of_groups is the number of groups to divide the rows into.
        - ORDER BY is used to specify the order of the rows.
 */
 
--- Calculate the 4th percentile of the students mathemathics score.
+-- Calculate the 4th percentile of the students mathematics score.
 SELECT name,
        mathematics,
        NTILE(4) OVER (ORDER BY mathematics) AS percentile
@@ -3836,7 +3804,306 @@ FROM orders
 ORDER BY account_id DESC;
 
 
+/*
+WINDOW FUNCTIONS CONTINUED
+*/
+-- Find highest salary for each department.
+SELECT d.dep_name AS department,
+       MAX(e.salary) AS highest_salary
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+GROUP BY d.dep_name;
+/*
+This query returns the department name and the highest salary for each department. The GROUP BY clause is used to
+group the rows by the department name, and the MAX() function is used to find the highest salary for each group.
 
+However, if you want to get the employee name and the highest salary for each department, the query will not work
+without using a subquery or a window function.
+*/
+
+-- Find highest salary for each department using a subquery.
+SELECT d.dep_name AS department,
+       e.salary AS highest_salary,
+       e.name AS employee
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE e.salary = (SELECT MAX(salary)
+                  FROM empsalary
+                  WHERE dep_id = e.dep_id);
+
+-- We can also rewrite the above subquery like below.
+SELECT d.dep_name AS department,
+       e.salary AS highest_salary,
+       e.name AS employee
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE (e.salary, e.dep_id) IN (SELECT MAX(salary), dep_id
+                               FROM empsalary
+                               GROUP BY dep_id);
+
+-- Find highest salary for each department using a window function.
+-- Use RANK()
+SELECT d.dep_name AS department,
+       RANK() OVER (PARTITION BY e.dep_id
+                    ORDER BY e.salary DESC) AS rank,
+         e.salary AS highest_salary,
+            e.name AS employee
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id;
+
+-- Let's now use the RANK() function and subquery to find the highest salary for each department.
+SELECT *
+FROM (SELECT d.dep_name AS department,
+       RANK() OVER (PARTITION BY d.dep_name
+                    ORDER BY e.salary DESC) AS rank,
+         e.salary AS highest_salary,
+            e.name AS employee_name
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id) e
+WHERE e.rank = 1;
+
+-- Using LAG() function to find the difference between the current row and the previous row in the salary column.
+SELECT d.dep_name AS department,
+       e.salary AS salary,
+       LAG(e.salary, 1) OVER (PARTITION BY e.dep_id
+                              ORDER BY e.salary DESC) AS previous_salary,
+       e.salary - LAG(e.salary, 1) OVER (PARTITION BY e.dep_id
+                                        ORDER BY e.salary DESC) AS difference
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id;
+
+-- Using LEAD() function to indicate if the salary is higher or lower than the next row for sales department.
+SELECT d.dep_name AS department,
+       e.salary AS salary,
+       LEAD(e.salary, 1) OVER (PARTITION BY e.dep_id
+                               ORDER BY e.salary DESC) AS next_salary,
+       CASE WHEN e.salary > LEAD(e.salary, 1) OVER (PARTITION BY e.dep_id
+                                                   ORDER BY e.salary DESC)
+            THEN 'higher'
+            ELSE 'lower'
+       END AS salary_comparison
+FROM empsalary e
+JOIN departments d
+ON e.dep_id = d.dep_id
+WHERE d.dep_name = 'Sales';
+
+-- Generate a product table with the product_id, product_category, brand, product_name, and price columns.
+CREATE TABLE my_products (
+    product_id INT,
+    product_category VARCHAR(50),
+    brand VARCHAR(50),
+    product_name VARCHAR(50),
+    price INT
+);
+
+-- Insert data into the products table.
+INSERT INTO my_products (product_id, product_category, brand, product_name, price)
+VALUES
+(1, 'Phone', 'Apple', 'iPhone 13 Pro Max', 1300),
+(2, 'Phone', 'Apple', 'iPhone 13 Pro', 1100),
+(3, 'Phone', 'Apple', 'iPhone 13', 1000),
+(4, 'Phone', 'Samsung', 'Galaxy Z Fold 4', 1800),
+(5, 'Phone', 'Samsung', 'Galaxy Z Flip 4', 1000),
+(6, 'Phone', 'Samsung', 'Galaxy Note 20 Plus', 1200),
+(7, 'Phone', 'Samsung', 'Galaxy S23', 1500),
+(8, 'Phone', 'OnePlus', 'OnePlus 10', 800),
+(9, 'Phone', 'Google', 'Pixel 5', 600),
+(10, 'Laptop', 'Apple', 'MacBook Pro 13', 2000),
+(11, 'Laptop', 'Apple', 'MacBook Air', 1200),
+(12, 'Laptop', 'Microsoft', 'Surface Laptop 4', 2100),
+(13, 'Laptop', 'Dell', 'XPS 13', 2000),
+(14, 'Laptop', 'Dell', 'XPS 15', 2300),
+(15, 'Laptop', 'Dell', 'XPS 17', 2500),
+(16, 'Earphone', 'Apple', 'AirPods Pro', 280),
+(17, 'Earphone', 'Samsung', 'Galaxy Buds Pro', 220),
+(18, 'Earphone', 'Samsung', 'Galaxy Buds Live', 170),
+(19, 'Earphone', 'Sony', 'WF-1000XM4', 250),
+(20, 'Headphone', 'Sony', 'WH-1000XM4', 400),
+(21, 'Headphone', 'Apple', 'AirPods Max', 550),
+(22, 'Headphone', 'Microsoft', 'Surface Headphones 2', 250),
+(23, 'Smartwatch', 'Apple', 'Apple Watch Series 6', 1000),
+(24, 'Smartwatch', 'Apple', 'Apple Watch SE', 400),
+(25, 'Smartwatch', 'Samsung', 'Galaxy Watch 4', 600);
+
+
+-- Display my_products table.
+SELECT * FROM my_products;
+
+/*
+FIRST_VALUE() function returns the first value in the specified column. The function ignores null values.
+The syntax of the FIRST_VALUE() function is as follows:
+FIRST_VALUE(column_name) OVER (PARTITION BY column_name ORDER BY column_name ASC/DESC)
+*/
+
+-- Find the first product name for each product category.
+SELECT *,
+       FIRST_VALUE(product_name) OVER (PARTITION BY product_category
+                                       ORDER BY product_id ) AS first_product
+FROM my_products;
+
+-- Write query to display the most expensive product under each category (corresponding to each record)
+SELECT *,
+       FIRST_VALUE(price) OVER (PARTITION BY product_category
+                                ORDER BY price DESC) AS most_expensive_product
+FROM my_products;
+
+
+/*
+LAST_VALUE() function returns the last value in the specified column. The function ignores null values.
+The syntax of the LAST_VALUE() function is as follows:
+LAST_VALUE(column_name) OVER (PARTITION BY column_name ORDER BY column_name ASC/DESC)
+*/
+
+-- Find the last product name for each product category.
+SELECT *,
+       LAST_VALUE(product_name) OVER (PARTITION BY product_category
+                                      ORDER BY price DESC ) AS last_product
+FROM my_products;
+/*
+The results above is not correct because the LAST_VALUE() function takes into consideration the default FRAME clause
+which is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW.
+
+RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW means that the function will return the last value in the current row
+and all the rows preceding the current row.
+
+To fix this, we need to specify the RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING clause.
+*/
+
+-- Find the last product name for each product category.
+-- Specify the RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING clause.
+SELECT *,
+       LAST_VALUE(product_name) OVER (PARTITION BY product_category
+                                      ORDER BY price DESC
+                                      RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_product
+FROM my_products;
+
+/*
+CUME_DIST() function returns the cumulative distribution of a value in a group of values.
+The syntax of the CUME_DIST() function is as follows:
+CUME_DIST() OVER (PARTITION BY column_name ORDER BY column_name ASC/DESC)
+*/
+
+-- Find the cumulative distribution of the price for each product category.
+SELECT *,
+       CUME_DIST() OVER (PARTITION BY product_category
+                         ORDER BY price DESC) AS cumulative_distribution
+FROM my_products;
+
+SELECT *,
+       round(CUME_DIST() OVER (PARTITION BY product_category
+                         ORDER BY price DESC)::numeric, 2) AS cumulative_distribution
+FROM my_products;
+
+
+/*
+PERCENT_RANK() function returns the percentage rank of a value in a group of values.
+The syntax of the PERCENT_RANK() function is as follows:
+PERCENT_RANK() OVER (PARTITION BY column_name ORDER BY column_name ASC/DESC)
+*/
+
+-- Find the percentage rank of the price for each product category.
+SELECT *,
+       round(PERCENT_RANK() OVER (ORDER BY price)::numeric * 100, 2) AS percentage_rank
+FROM my_products;
+
+-- Compare how expensive is Surface Headphones 2 compared to other products
+SELECT product_name, percentage_rank
+FROM (SELECT *,
+             round(PERCENT_RANK() OVER (ORDER BY price)::numeric * 100, 2) AS percentage_rank
+      FROM my_products) AS p_table
+WHERE p_table.product_name = 'Surface Headphones 2';
+
+/*
+CTE (Common Table Expression) is a temporary result set that can be referenced in the FROM clause of a SELECT statement.
+The CTE is defined using the WITH clause and can be used in the same query or in a subquery.
+The CTE can be used to simplify complex queries and improve the readability of the query.
+The CTE syntax is as follows:
+WITH CTE_name AS (
+    SELECT column_name
+    FROM table_name
+    WHERE condition
+)
+SELECT column_name
+FROM CTE_name
+*/
+
+-- Display the student table
+SELECT * FROM student;
+
+-- Using CTE, find the students whose score in the math test is greater than the average score of all students.
+WITH math_score AS (
+    SELECT id, mathematics, name, AVG(mathematics) OVER () AS avg_math_score
+    FROM student
+)
+SELECT s.id, s.name, s.mathematics, s.avg_math_score
+FROM math_score AS s
+WHERE s.mathematics > s.avg_math_score;
+
+-- This can also be done by using a subquery.
+SELECT s.id, s.name, s.mathematics, s.avg_math_score
+FROM (SELECT id, mathematics, name, AVG(mathematics) OVER () AS avg_math_score
+      FROM student) AS s
+WHERE s.mathematics > (SELECT AVG(mathematics) FROM student);
+
+-- Find the average price in my_products table.
+SELECT AVG(price) FROM my_products;
+
+-- Find the total price of each product category.
+SELECT product_category, SUM(price) AS total_price
+FROM my_products
+GROUP BY product_category;
+
+-- Using the query above, find the average total price of each product category.
+SELECT AVG(total_price) FROM (
+    SELECT SUM(price) AS total_price
+    FROM my_products
+    GROUP BY product_category
+) AS p_table;
+
+SELECT product_category, SUM(price) AS total_price
+FROM my_products
+GROUP BY product_category
+HAVING SUM(price) > (SELECT AVG(total_price)
+                     FROM (SELECT SUM(price) AS total_price
+                           FROM my_products
+                           GROUP BY product_category) AS p_table);
+
+-- Rewrite the query above using CTE.
+WITH product_category_total_price AS (
+    SELECT product_category, SUM(price) AS total_price_per_category
+    FROM my_products
+    GROUP BY product_category
+)
+SELECT product_category, total_price_per_category
+FROM product_category_total_price
+WHERE total_price_per_category > (SELECT AVG(total_price_per_category)
+                     FROM product_category_total_price);
+
+-- Lets include the average total price in the result.
+WITH product_category_total_price AS (
+    SELECT product_category, SUM(price) AS total_price_per_category
+    FROM my_products
+    GROUP BY product_category
+)
+SELECT product_category, total_price_per_category,
+       (SELECT AVG(total_price_per_category)
+        FROM product_category_total_price) AS avg_total_price
+FROM product_category_total_price
+WHERE total_price_per_category > (SELECT AVG(total_price_per_category)
+                     FROM product_category_total_price);
+
+
+/*
+MORE TRAINING ON JOINS
+*/
+
+-- Create join_employee tables, emp_id, emp_name, salary, dep_id, manager_id
 
 
 
