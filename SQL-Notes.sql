@@ -4104,6 +4104,291 @@ MORE TRAINING ON JOINS
 */
 
 -- Create join_employee tables, emp_id, emp_name, salary, dep_id, manager_id
+CREATE TABLE join_employee (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    salary INT,
+    dep_id INT,
+    manager_id INT
+);
+
+-- Insert data into join_employee table
+INSERT INTO join_employee (emp_id, emp_name, salary, dep_id, manager_id)
+VALUES (1, 'James Smith', 50000, 1234, 6789),
+       (2, 'Michael Jordan', 60000,1111 , 8888),
+       (3, 'Robert Pattinson', 100000, 1111, 6666),
+       (4, 'Emma Watson', 90000, 2345, 5678),
+       (5, 'Meda Chepkoech', 110000, 2345, 5678),
+       (6, 'Lionel Messi', 80000, 2222, 8976),
+       (7, 'Cristiano Ronaldo', 70000, 1234, 8976),
+       (8, 'Neyman Jr', 120000, 2345, 9999),
+       (9, 'Virat Kohli', 95000, 4324, 6789),
+       (10, 'Rohit Sharma', 85000, 4444, 8976),
+       (11, 'Steve Smith', 105000, 4444, 9876),
+       (12, 'Kane Williamson', 115000, 2345, 9876),
+       (13, 'Joe Root', 125000, 3333, 9876),
+       (14, 'Ben Stokes', 135000, 1234, 9999),
+       (15, 'Marcus Labuschagne', 145000, 3333, 7777);
+
+-- Display the join_employee table
+SELECT * FROM join_employee;
+
+-- Create join_department table, dep_id, dep_name
+CREATE TABLE join_department (
+    dep_id INT PRIMARY KEY,
+    dep_name VARCHAR(50)
+);
+-- Insert data into join_department table
+INSERT INTO join_department (dep_id, dep_name)
+VALUES (1234, 'Sales'),
+       (2345, 'Marketing'),
+       (4321, 'IT'),
+       (4324, 'Finance'),
+       (5678, 'Human Resources'),
+       (5432, 'Admin'),
+       (6543, 'Operations');
+-- Display the join_department table
+SELECT * FROM join_department;
+
+-- Create join_manager table, manager_id, manager_name, dep_id
+CREATE TABLE join_manager (
+    manager_id INT PRIMARY KEY,
+    manager_name VARCHAR(50),
+    dep_id INT
+);
+
+-- Insert data into join_manager table
+INSERT INTO join_manager (manager_id, manager_name, dep_id)
+VALUES (5678, 'Rellika Kisyula', 2345),
+       (6789, 'Jane Doe', 4321),
+       (9876, 'Christie Markus', 4324),
+       (8976, 'Miles Morales', 1234),
+       (8667, 'Superman Clark', 2345),
+       (9870, 'Kratos Spartan', 4324),
+       (8765, 'Lara Croft', 4322),
+       (5432, 'Tony Stark', 4324),
+       (2109, 'Peter Parker', 2335),
+       (4987, 'Bruce Wayne', 4321);
+
+-- Display the join_manager table
+SELECT * FROM join_manager;
+
+-- Create a join_project table, project_id, project_name, team_member_id
+CREATE TABLE join_project (
+    project_id INT PRIMARY KEY,
+    project_name VARCHAR(50),
+    team_member_id INT
+);
+-- Insert data into join_project table
+INSERT INTO join_project (project_id, project_name, team_member_id)
+VALUES (1, 'SQL Injection', 5678),
+         (2, 'Web Development', 82),
+         (3, 'Data Analysis', 14),
+         (4, 'Machine Learning', 79),
+         (5, 'Visualization With Python', 5678),
+         (6, 'Test Automation', 6789),
+         (7, 'Adding Authentication Services', 9876),
+         (8, 'Mining and Data Collection', 1);
+
+-- Display the join_project table
+SELECT * FROM join_project;
+
+-- Fetch the employee name, salary, department name
+SELECT e.emp_name, e.salary, d.dep_name
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id;
+
+-- Fetch all the employees and their department name
+SELECT e.emp_name, d.dep_name
+FROM join_employee e
+LEFT JOIN join_department d
+ON d.dep_id = e.dep_id;
+
+-- Fetch all departments and the employees in each department using RIGHT JOIN
+SELECT d.dep_name, e.emp_name
+FROM join_employee e
+RIGHT JOIN join_department d
+ON d.dep_id = e.dep_id;
+-- Fetch all employees, their department name, their manager name and the project they are working on
+SELECT e.emp_name, d.dep_name, m.manager_name, p.project_name
+FROM join_employee e
+LEFT JOIN join_department d
+ON d.dep_id = e.dep_id
+LEFT JOIN join_manager m
+ON m.manager_id = e.manager_id
+LEFT JOIN join_project p
+ON p.team_member_id = e.emp_id;
+
+-- Fetch all the employees and all the departments name
+SELECT e.emp_name, d.dep_name
+FROM join_employee e
+FULL JOIN join_department d
+ON d.dep_id = e.dep_id;
+
+-- SELF JOIN
+-- Create a family table, id, name, parent_id, age
+CREATE TABLE family (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    parent_id INT,
+    age INT
+);
+-- Insert data into family table
+INSERT INTO family (id, name, parent_id, age)
+VALUES (1, 'James Smith', NULL, 70),
+       (2, 'Michael Jordan', NULL, 60),
+       (3, 'Robert Pattinson', 1, 35),
+       (4, 'Emma Watson', 1, 28),
+       (5, 'Meda Chepkoech', 2, 8),
+       (6, 'Lionel Messi', 2, 5),
+       (7, 'Cristiano Ronaldo', 3, 3),
+       (8, 'Neyman Jr', 3, 2),
+       (9, 'Virat Kohli', 4, 9),
+       (10, 'Rohit Sharma', 4, 5);
+
+-- Display the family table
+SELECT * FROM family;
+
+-- Fetch all the children and their parents name
+SELECT f1.name AS child, f2.name AS parent, f1.age AS child_age, f2.age AS parent_age
+FROM family f1
+JOIN family f2
+ON f1.parent_id = f2.id;
+
+/*
+SUB QUERY REVISIT
+*/
+
+-- Find the employees who earn more than the average salary
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary > (SELECT AVG(salary) FROM join_employee);
+
+/*
+SCALAR SUB QUERY
+Scalar sub query returns a single value. It is used in the WHERE clause, HAVING clause, SELECT clause and INSERT clause.
+Example:
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary > (SELECT AVG(salary) FROM join_employee);
+*/
+
+-- Find the employees who earn more than the average salary
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary > (SELECT AVG(salary) FROM join_employee);
+
+/*
+MULTI ROW SUB QUERY
+Multi row sub query returns multiple rows.
+Example:
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary IN (SELECT salary FROM join_employee WHERE salary > 90000);
+*/
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary IN (SELECT salary FROM join_employee WHERE salary > 90000);
+
+/*
+MULTI COLUMN SUB QUERY
+Multi column sub query returns multiple columns.
+Example:
+SELECT emp_name, salary
+FROM join_employee
+WHERE (emp_name, salary) IN (SELECT emp_name, salary FROM join_employee WHERE salary > 90000);
+*/
+SELECT emp_name, salary
+FROM join_employee
+WHERE (emp_name, salary) IN (SELECT emp_name, salary FROM join_employee WHERE salary > 90000);
+
+-- Find the employees who earn most in each department. Include the department name
+SELECT e.emp_name, e.salary, d.dep_name, e.dep_id
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+WHERE e.salary = (SELECT MAX(salary) FROM join_employee WHERE dep_id = e.dep_id);
+
+-- We can also use WITH clause to solve the above problem. Include the department name
+WITH max_salary AS (
+    SELECT dep_id, MAX(salary) AS max_salary
+    FROM join_employee
+    GROUP BY dep_id
+)
+SELECT e.emp_name, e.salary, d.dep_name, e.dep_id
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+JOIN max_salary m
+ON m.dep_id = e.dep_id
+WHERE e.salary = m.max_salary;
+
+/*
+CORRELATED SUB QUERY
+Correlated sub query is a sub query that uses a column from the outer query.
+Example:
+SELECT emp_name, salary
+FROM join_employee
+WHERE salary > (SELECT AVG(salary) FROM join_employee WHERE dep_id = 1);
+*/
+SELECT emp_name, salary, dep_id
+FROM join_employee e
+WHERE salary > (SELECT AVG(salary) FROM join_employee e2 WHERE e2.dep_id = e.dep_id);
+
+-- Find the employees who earn more than the average salary of their department
+SELECT emp_name, salary, dep_id
+FROM join_employee e
+WHERE salary > (SELECT AVG(salary) FROM join_employee e2 WHERE e2.dep_id = e.dep_id);
+
+-- Find the employees who earn more than the average salary of their department. Include the department name
+SELECT e.emp_name, e.salary, d.dep_name, e.dep_id
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+WHERE e.salary > (SELECT AVG(salary) FROM join_employee e2 WHERE e2.dep_id = e.dep_id);
+
+-- Find the employees who earn more than the average salary of their department. Include the department name and
+-- the average salary of the department
+SELECT e.emp_name, e.salary, d.dep_name, e.dep_id,
+       (SELECT AVG(salary) FROM join_employee e2 WHERE e2.dep_id = e.dep_id) AS avg_salary
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+WHERE e.salary > (SELECT AVG(salary) FROM join_employee e2 WHERE e2.dep_id = e.dep_id);
+
+-- Get average salary of each department, include the department name
+SELECT d.dep_name, e.dep_id, AVG(e.salary) AS avg_salary
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+GROUP BY e.dep_id, d.dep_name;
+
+-- Show employees in Finance department who earn more than the average salary of the Finance department
+SELECT e.emp_name, e.salary, d.dep_name, e.dep_id
+FROM join_employee e
+JOIN join_department d
+ON d.dep_id = e.dep_id
+WHERE d.dep_name = 'Finance';
+
+-- Find department who do not have any employee
+SELECT d.dep_name, d.dep_id
+FROM join_department d
+LEFT JOIN join_employee e
+ON d.dep_id = e.dep_id
+WHERE e.emp_id IS NULL;
+
+-- We can also use NOT EXISTS to solve the above problem
+SELECT d.dep_name, d.dep_id
+FROM join_department d
+WHERE NOT EXISTS (SELECT * FROM join_employee e WHERE e.dep_id = d.dep_id);
+
+
+
+
+
+
+
 
 
 
